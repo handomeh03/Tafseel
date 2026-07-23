@@ -4,11 +4,13 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { LoginDto } from './dto/LoginDto';
 import type { Response } from 'express';
+import { IsPublic } from './Decorators/Public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
+  @IsPublic()
   @Post('login')
   async login(
     @Body() loginDto: LoginDto,

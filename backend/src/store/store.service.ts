@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { StoreRequestDto } from './dto/Storerequest.dto';
 import { GetAllRequestDto } from './dto/GetAllRequest.dto';
@@ -103,84 +103,127 @@ export class StoreService {
       );
     }
   }
-  async approveRequest(id: number, UpdateRequestStatusDto: UpdateRequestStatusDto) {
-    try {
-      const { status } = UpdateRequestStatusDto;
+  async approveRequest(id: number, updateRequestStatusDto: UpdateRequestStatusDto) {
+  const logger = new Logger('ApproveRequest');
 
-      const request = await this.database.storeRequest.findUnique({
-        where: { id },
+  try {
+    const { status } = updateRequestStatusDto;
+
+    // check if request exists
+    const request = await this.database.storeRequest.findUnique({
+      where: { id },
+    });
+
+    if (!request) {
+      throw new NotFoundException(`Store request #${id} not found`);
+    }
+
+    if (request.status !== RequestStatus.PENDING) {
+      throw new BadRequestException(`Request has already been processed as ${request.status}`);
+    }
+
+    // check if user exists and approve
+    if (status === RequestStatus.APPROVED) {
+      const existingUser = await this.database.user.findFirst({
+        where: {
+          OR: [{ email: request.email }, { phone: request.phone }],
+        },
       });
 
-      if (!request) {
-        throw new NotFoundException(`Store request #${id} not found.`);
+      if (existingUser) {
+        const field = existingUser.email === request.email ? 'Email' : 'Phone number';
+        throw new ConflictException(`${field} is already associated with another account`);
       }
 
-      if (request.status !== RequestStatus.PENDING) {
-        throw new BadRequestException(`Request has already been processed as ${request.status}.`);
-      }
+      const tempPassword = `Tafseel@${Math.floor(1000 + Math.random() * 9000)}`;
+      const hashedPassword = await this.cryptSecurityService.hash(tempPassword, 10);
 
-      if (status === RequestStatus.APPROVED) {
-
-        const tempPassword = `Tafseel@${Math.floor(1000 + Math.random() * 9000)}`;
-        const hashedPassword = await this.cryptSecurityService.hash(tempPassword, 10);
-
-
-        await this.database.$transaction(async (tx) => {
-
-          await tx.user.create({
-            data: {
-              name: request.ownerName,
-              email: request.email,
-              phone: request.phone,
-              password: hashedPassword,
-              role: Role.STORE_OWNER,
-              isActive: true,
-            },
-          });
-
-          await tx.storeRequest.update({
-            where: { id },
-            data: { status: RequestStatus.APPROVED },
-          });
+      // create user and store within transaction 
+      await this.database.$transaction(async (tx) => {
+        
+        const newUser = await tx.user.create({
+          data: {
+            name: request.ownerName,
+            email: request.email,
+            phone: request.phone,
+            password: hashedPassword,
+            role: Role.STORE_OWNER,
+            isActive: true,
+          },
         });
 
+        
+        await tx.store.create({
+          data: {
+            storeName: request.storeName,
+            city: request.city,
+            ownerId: newUser.id, 
+          },
+        });
 
+        await tx.storeRequest.update({
+          where: { id },
+          data: { status: RequestStatus.APPROVED },
+        });
+      });
+
+      // send email
+      let emailSent = true;
+      try {
         await this.Emailer.SendEmailOfStoreRequest(
           'Store Request Approved - Tafseel Platform',
           request.email,
           'ApproveStoreRequest',
           tempPassword,
         );
-
-        return { message: 'Store request approved, account created, and email sent successfully.' };
+      } catch (mailError) {
+        emailSent = false;
+        logger.error(`Failed to send approval email to ${request.email}:`, mailError);
       }
 
+      return {
+        message: emailSent
+          ? 'Store request approved, account and store created, and email sent successfully'
+          : 'Store request approved, account and store created, but notification email failed to send',
+      };
+    }
 
-      if (status === RequestStatus.REJECTED) {
+    if (status === RequestStatus.REJECTED) {
+      await this.database.storeRequest.update({
+        where: { id },
+        data: { status: RequestStatus.REJECTED },
+      });
 
-        await this.database.storeRequest.update({
-          where: { id },
-          data: { status: RequestStatus.REJECTED },
-        });
-
-
+      let emailSent = true;
+      try {
         await this.Emailer.SendEmailOfStoreRequest(
           'Store Request Update - Tafseel Platform',
           request.email,
           'RejectStoreRequest',
         );
-
-        return {
-          message: 'Store request rejected and notification email sent.',
-        };
-      }
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
-        throw error;
+      } catch (mailError) {
+        emailSent = false;
+        logger.error(`Failed to send rejection email to ${request.email}:`, mailError);
       }
 
-      throw new InternalServerErrorException('An error occurred while processing the store request status');
+      return {
+        message: emailSent
+          ? 'Store request rejected and notification email sent'
+          : 'Store request rejected, but notification email failed to send',
+      };
     }
 
+  } catch (error: any) {
+    if (error instanceof NotFoundException || error instanceof BadRequestException || error instanceof ConflictException) {
+      throw error;
+    }
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      throw new ConflictException('User with this email or phone already exists.');
+    }
+
+    logger.error('Error processing store request:', error);
+    throw new InternalServerErrorException(error.message || 'Something went wrong processing the request');
   }
+}
 }

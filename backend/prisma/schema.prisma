@@ -12,38 +12,72 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String?
-  email      String   @unique
-  password   String
-  role       Role     @default(CUSTOMER)
+  id           Int      @id @default(autoincrement())
+  name         String?
+  email        String   @unique
+  password     String
+  role         Role     @default(CUSTOMER)
   refreshToken String?
-  image      String?
-  phone      String?  @unique
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  @@index([email])
+  image        String?
+  phone        String?  @unique
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  store        Store?
 
+  @@index([email])
+}
+
+model Store {
+  id          Int       @id @default(autoincrement())
+  storeName   String
+  city        String?
+  description String?
+  logo        String?
+  ownerId     Int       @unique
+  owner       User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([ownerId])
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  price       Float
+  images      String[] 
+  isAvailable Boolean  @default(true)
+  storeId     Int
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([storeId])
 }
 
 model StoreRequest {
-  id           Int           @id @default(autoincrement())
-  storeName    String      
-  ownerName    String       
-  email        String        @unique 
-  phone        String       
-  city         String?      
-  notes        String?      
-  status       RequestStatus @default(PENDING)
+  id              Int           @id @default(autoincrement())
+  storeName       String      
+  ownerName       String       
+  email           String        @unique 
+  phone           String       
+  city            String?      
+  notes           String?      
+  status          RequestStatus @default(PENDING)
   rejectionReason String?  
 
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@index([email])
   @@index([status])
 }
+
 enum Role {
   SUPER_ADMIN
   STORE_OWNER

@@ -1,26 +1,34 @@
-
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
 
-  const configService = app.get(ConfigService);
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-    })
-  );
+  try {
+    const app = await NestFactory.create(AppModule);
 
-  app.use(cookieParser());
-  app.enableCors();
-  await app.listen(
-    configService.get<number>('PORT') ?? 3000
-  );
+    const configService = app.get(ConfigService);
+    const port = configService.get<number>('PORT') ?? 3000;
+
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
+
+    app.use(cookieParser());
+    app.enableCors();
+
+    await app.listen(port);
+    logger.log(` Application is running on: http://localhost:${port}`);
+  } catch (error) {
+    logger.error(' Failed to start application:', error);
+    process.exit(1);
+  }
 }
 
 bootstrap();
