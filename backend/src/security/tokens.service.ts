@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -22,4 +22,20 @@ export class TokensService {
             secret: process.env.REFRESHTOKEN
         });
     }
+    async verifyAccessToken(token: string) {
+      return await this.jwtService.verifyAsync(token, {
+        secret: process.env.ACCESSTOKEN,
+      });
+   
+  }
+
+  async verifyRefreshToken(token: string) {
+   
+      return await this.jwtService.verifyAsync(token, {
+        secret: process.env.REFRESHTOKEN,
+      });
+    
+    
+  }
+    
 }
