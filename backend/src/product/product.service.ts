@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -7,7 +12,7 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly database: DatabaseService) { }
+  constructor(private readonly database: DatabaseService) {}
 
   async createProduct(createProductDto: CreateProductDto, ownerId: number) {
     try {
@@ -16,7 +21,7 @@ export class ProductService {
       });
 
       if (!store) {
-        throw new NotFoundException('Store not found for this user');
+        throw new NotFoundException('لم يتم العثور على المتجر لهذا المستخدم');
       }
 
       await this.database.product.create({
@@ -26,13 +31,15 @@ export class ProductService {
         },
       });
 
-      return { message: 'Product created successfully' };
+      return { message: 'تم إنشاء المنتج بنجاح' };
     } catch (error: any) {
       if (error instanceof NotFoundException) {
         throw error;
       }
 
-      throw new InternalServerErrorException(error.message || 'Failed to create product');
+      throw new InternalServerErrorException(
+        error.message || 'فشل في إنشاء المنتج',
+      );
     }
   }
 
@@ -43,7 +50,7 @@ export class ProductService {
       });
 
       if (!store) {
-        throw new NotFoundException('Store not found for this user');
+        throw new NotFoundException('لم يتم العثور على المتجر لهذا المستخدم');
       }
 
       const { page = 1, limit = 10, search } = queryDto;
@@ -55,6 +62,7 @@ export class ProductService {
 
       if (search && search.trim() !== '') {
         const cleanSearch = search.trim();
+
         where.OR = [
           { title: { contains: cleanSearch, mode: 'insensitive' } },
           { description: { contains: cleanSearch, mode: 'insensitive' } },
@@ -87,12 +95,16 @@ export class ProductService {
       }
 
       throw new InternalServerErrorException(
-        'An error occurred while getting all products',
+        'حدث خطأ أثناء جلب المنتجات',
       );
     }
   }
 
-  async editProduct(updateProductDto: UpdateProductDto, ownerId: number, productId: number) {
+  async editProduct(
+    updateProductDto: UpdateProductDto,
+    ownerId: number,
+    productId: number,
+  ) {
     try {
       const product = await this.database.product.findFirst({
         where: {
@@ -104,22 +116,28 @@ export class ProductService {
       });
 
       if (!product) {
-        throw new NotFoundException('Product not found or access denied');
+        throw new NotFoundException(
+          'المنتج غير موجود أو ليس لديك صلاحية الوصول إليه',
+        );
       }
-
 
       await this.database.product.update({
         where: { id: productId },
         data: updateProductDto,
       });
 
-      return { message: 'Product updated successfully' };
+      return { message: 'تم تحديث المنتج بنجاح' };
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
 
-      throw new InternalServerErrorException('Failed to update product');
+      throw new InternalServerErrorException(
+        'فشل في تحديث المنتج',
+      );
     }
   }
 
@@ -135,20 +153,27 @@ export class ProductService {
       });
 
       if (!product) {
-        throw new NotFoundException('Product not found or access denied');
+        throw new NotFoundException(
+          'المنتج غير موجود أو ليس لديك صلاحية الوصول إليه',
+        );
       }
 
       await this.database.product.delete({
         where: { id: productId },
       });
 
-      return { message: 'Product deleted successfully' };
+      return { message: 'تم حذف المنتج بنجاح' };
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
 
-      throw new InternalServerErrorException('Failed to delete product');
+      throw new InternalServerErrorException(
+        'فشل في حذف المنتج',
+      );
     }
   }
 }

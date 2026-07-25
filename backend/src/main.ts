@@ -11,7 +11,7 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
     const configService = app.get(ConfigService);
-    const port = configService.get<number>('PORT') ?? 3000;
+    const port = configService.get<number>('PORT') ?? 3001;
 
     app.useGlobalPipes(
       new ValidationPipe({
@@ -21,12 +21,17 @@ async function bootstrap() {
     );
 
     app.use(cookieParser());
-    app.enableCors();
+
+    app.enableCors({
+      origin: 'http://localhost:3000', 
+      credentials: true, 
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    });
 
     await app.listen(port);
-    logger.log(` Application is running on: http://localhost:${port}`);
+    logger.log(`Application is running on: http://localhost:${port}`);
   } catch (error) {
-    logger.error(' Failed to start application:', error);
+    logger.error('Failed to start application:', error);
     process.exit(1);
   }
 }

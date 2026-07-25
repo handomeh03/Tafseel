@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { LoginDto } from './dto/LoginDto';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { IsPublic } from './Decorators/Public.decorator';
 
 @Controller('auth')
@@ -16,7 +16,7 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const { accessToken, RefreshToken } = await this.authService.Login(loginDto);
+    const { accessToken, RefreshToken,role } = await this.authService.Login(loginDto);
 
     response.cookie('refreshToken', RefreshToken, {
       httpOnly: true, //to prevent js to access refresh token (xss)
@@ -24,7 +24,15 @@ export class AuthController {
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return {accessToken};
+    return {accessToken,role};
+  }
+
+  @Get("me")
+  async getme( @Req() req: Request){
+     const user = req['user'];
+    const userId = user.sub;
+    return await this.authService.getme(userId);
+
   }
 
 
