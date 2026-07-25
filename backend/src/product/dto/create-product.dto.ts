@@ -1,29 +1,29 @@
-import { 
-  IsString, 
-  IsNumber, 
-  IsOptional, 
-  IsArray, 
-  IsNotEmpty, 
-  Min 
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsArray,
+  IsNotEmpty,
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateProductDto {
-  @IsString({ message: 'Title must be a text string' })
-  @IsNotEmpty({ message: 'Product title is required' })
+  @IsString({ message: 'عنوان المنتج يجب أن يكون نصًا' })
+  @IsNotEmpty({ message: 'عنوان المنتج مطلوب' })
   title!: string;
 
-  @IsString({ message: 'Description must be a text string' })
+  @IsString({ message: 'وصف المنتج يجب أن يكون نصًا' })
   @IsOptional()
   description?: string;
 
-  @IsNumber({}, { message: 'Price must be a valid number' })
-  @Min(0, { message: 'Price cannot be negative' })
+  @IsNumber({}, { message: 'السعر يجب أن يكون رقمًا صحيحًا' })
+  @Min(0, { message: 'السعر لا يمكن أن يكون أقل من صفر' })
   @Type(() => Number)
   price!: number;
 
-  @IsArray({ message: 'Images must be provided as an array' })
-  @IsString({ each: true, message: 'Each image must be a valid string' })
+  @IsArray({ message: 'الصور يجب أن تكون على شكل مصفوفة' })
+  @IsString({ each: true, message: 'كل صورة يجب أن تكون نصًا' })
   @IsOptional()
   images?: string[];
 }

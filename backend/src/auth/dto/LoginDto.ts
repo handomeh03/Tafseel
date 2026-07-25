@@ -1,16 +1,14 @@
-import { Matches, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class LoginDto {
-    @IsString({ message: 'Email must be a string' })
-    @Matches(
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-        {
-            message: 'Please provide a valid email address',
-        },
-    )
-    email: string;
+  @IsString({ message: 'البريد الإلكتروني يجب أن يكون نصًا' })
+  @IsNotEmpty({ message: 'البريد الإلكتروني مطلوب' })
+  @Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
+    message: 'يرجى إدخال بريد إلكتروني صالح',
+  })
+  email!: string;
 
-    @IsString({ message: 'Password must be a string' })
-
-    password: string;
+  @IsString({ message: 'كلمة المرور يجب أن تكون نصًا' })
+  @IsNotEmpty({ message: 'كلمة المرور مطلوبة' })
+  password!: string;
 }
