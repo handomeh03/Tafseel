@@ -2,7 +2,7 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 // ====================== Axios Instance ======================
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
   headers: {
     "Content-Type": "application/json",
   },
@@ -13,6 +13,7 @@ api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const excludedEndpoints = [
       "/auth/login",
+      "/store/request"
     ];
 
     const isExcluded = config.url

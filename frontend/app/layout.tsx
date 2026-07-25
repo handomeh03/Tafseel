@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
+import Providers from "@/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +16,8 @@ const geistMono = Geist_Mono({
 
 
 export const metadata: Metadata = {
-  title: "Tafseel | Modern Furniture & Sofa Upholstery",
-  description: "Discover premium modern furniture and expert sofa upholstery services. High-quality craftsmanship, custom designs, and fabric renewal for your home.",
+  title: "تفصيل | أثاث عصري وتنجيد كنب برقيّ وجودة عالية",
+  description: "اكتشف أرقى قطع الأثاث العصري وخدمات تنجيد وتجديد الكنب الاحترافية. تصاميم حسب الطلب، قماش فاخر، وصنعة عالية الجودة لتجديد بيتك.",
 };
 
 export default function RootLayout({
@@ -28,7 +30,13 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Providers>
+          {children}
+        </Providers>
+
+        <Toaster position="top-right" richColors />
+      </body>
     </html>
   );
 }
