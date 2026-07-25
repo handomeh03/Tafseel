@@ -1,26 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  
+  --font-sans: 'Tajawal', 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  
+  --color-main-bg: #FDFBF7;     
+  --color-card-bg: #FFFFFF;      
+  --color-hero-bg: #1F1610;      
+  --color-brand-primary: #C87A3E;
+  --color-brand-accent: #2B3A33; 
+  --color-brand-dark: #1F1610;   
+  --color-brand-muted: #6E6259;  
+  --color-brand-light: #F6F2EA;  
+  --color-border-subtle: #E8E1D5;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: var(--color-main-bg);
+  --foreground: var(--color-brand-dark);
+}
+
+/* Base Styles */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+  direction: rtl; /* جاهز للغة العربية */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Text Selection */
+::selection {
+  background-color: var(--color-brand-primary);
+  color: #FFFFFF;
+}
+
+/* Custom Styled Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-main-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-dark);
+}
+
+/* Custom Utility Classes */
+@layer utilities {
+  .bg-main {
+    background-color: var(--color-main-bg);
+  }
+  .bg-card-custom {
+    background-color: var(--color-card-bg);
+  }
+  .bg-hero {
+    background-color: var(--color-hero-bg);
+  }
+  .bg-section-light {
+    background-color: var(--color-brand-light);
+  }
+  .bg-primary-accent {
+    background-color: var(--color-brand-primary);
+  }
+  .text-brand-dark {
+    color: var(--color-brand-dark);
+  }
+  .text-brand-muted {
+    color: var(--color-brand-muted);
+  }
+  .text-brand-primary {
+    color: var(--color-brand-primary);
+  }
+  .border-subtle {
+    border-color: var(--color-border-subtle);
+  }
 }
