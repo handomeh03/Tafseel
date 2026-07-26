@@ -24,31 +24,35 @@ export class StoreService {
 
   async StoreRequest(StoreRequestDto: StoreRequestDto) {
     try {
-      const { email } = StoreRequestDto;
+      const { email,phone } = StoreRequestDto;
 
-      const existingRequest = await this.database.storeRequest.findUnique({
-        where: { email },
+      const existingRequest = await this.database.storeRequest.findFirst({
+        where: {
+          OR: [{ email }, { phone }],
+        },
       });
 
       if (existingRequest) {
-        throw new ConflictException(
-          'تم إرسال طلب متجر بهذا البريد الإلكتروني مسبقًا',
-        );
+        if (existingRequest.email === email) {
+          throw new ConflictException( 'تم إرسال طلب متجر مسبقاً باستخدام هذا البريد الإلكتروني');
+        }
+        if (existingRequest.phone === phone) {
+          throw new ConflictException(  'تم إرسال طلب متجر مسبقاً باستخدام رقم الهاتف هذا' );
+        }
       }
 
-      const existingUser = await this.database.user.findUnique({
-        where: { email },
+      
+      const existingUser = await this.database.user.findFirst({
+        where: {
+          OR: [{ email }, { phone }],
+        },
       });
 
       if (existingUser) {
-        throw new BadRequestException(
-          'يوجد حساب مستخدم مسجل بهذا البريد الإلكتروني مسبقًا',
-        );
+        throw new BadRequestException( 'يوجد حساب مسجل مسبقاً بالبريد الإلكتروني أو رقم الهاتف المدخل' );
       }
 
-      await this.database.storeRequest.create({
-        data: StoreRequestDto,
-      });
+      await this.database.storeRequest.create({  data: StoreRequestDto});
 
       return { message: 'تم إرسال طلب إنشاء المتجر بنجاح' };
     } catch (error) {
@@ -59,9 +63,7 @@ export class StoreService {
         throw error;
       }
 
-      throw new InternalServerErrorException(
-        'حدث خطأ أثناء إرسال طلب المتجر',
-      );
+      throw new InternalServerErrorException('حدث خطأ أثناء إرسال طلب المتجر');
     }
   }
 
@@ -129,15 +131,11 @@ export class StoreService {
       });
 
       if (!request) {
-        throw new NotFoundException(
-          `طلب المتجر رقم ${id} غير موجود`,
-        );
+        throw new NotFoundException( `طلب المتجر رقم ${id} غير موجود`);
       }
 
       if (request.status !== RequestStatus.PENDING) {
-        throw new BadRequestException(
-          `تمت معالجة الطلب مسبقًا بالحالة ${request.status}`,
-        );
+        throw new BadRequestException(`تمت معالجة الطلب مسبقًا بالحالة ${request.status}` );
       }
 
       if (status === RequestStatus.APPROVED) {
@@ -153,9 +151,7 @@ export class StoreService {
               ? 'البريد الإلكتروني'
               : 'رقم الهاتف';
 
-          throw new ConflictException(
-            `${field} مرتبط بحساب آخر مسبقًا`,
-          );
+          throw new ConflictException(  `${field} مرتبط بحساب آخر مسبقًا` );
         }
 
         const tempPassword = `Tafseel@${Math.floor(
@@ -209,9 +205,7 @@ export class StoreService {
         }
 
         return {
-          message: emailSent
-            ? 'تم قبول طلب المتجر وإنشاء الحساب والمتجر وإرسال البريد الإلكتروني بنجاح'
-            : 'تم قبول طلب المتجر وإنشاء الحساب والمتجر ولكن فشل إرسال البريد الإلكتروني',
+          message: emailSent ? 'تم قبول طلب المتجر وإنشاء الحساب والمتجر وإرسال البريد الإلكتروني بنجاح' : 'تم قبول طلب المتجر وإنشاء الحساب والمتجر ولكن فشل إرسال البريد الإلكتروني',
         };
       }
 
@@ -232,16 +226,11 @@ export class StoreService {
         } catch (mailError) {
           emailSent = false;
 
-          logger.error(
-            `Failed to send rejection email to ${request.email}:`,
-            mailError,
-          );
+          logger.error( `Failed to send rejection email to ${request.email}:`, mailError);
         }
 
         return {
-          message: emailSent
-            ? 'تم رفض طلب المتجر وإرسال إشعار البريد الإلكتروني بنجاح'
-            : 'تم رفض طلب المتجر ولكن فشل إرسال إشعار البريد الإلكتروني',
+          message: emailSent  ? 'تم رفض طلب المتجر وإرسال إشعار البريد الإلكتروني بنجاح'  : 'تم رفض طلب المتجر ولكن فشل إرسال إشعار البريد الإلكتروني',
         };
       }
     } catch (error: any) {
@@ -257,16 +246,12 @@ export class StoreService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException(
-          'يوجد مستخدم بهذا البريد الإلكتروني أو رقم الهاتف مسبقًا',
-        );
+        throw new ConflictException('يوجد مستخدم بهذا البريد الإلكتروني أو رقم الهاتف مسبقًا');
       }
 
       logger.error('Error processing store request:', error);
 
-      throw new InternalServerErrorException(
-        error.message || 'حدث خطأ أثناء معالجة الطلب',
-      );
+      throw new InternalServerErrorException( error.message || 'حدث خطأ أثناء معالجة الطلب' );
     }
   }
 }
