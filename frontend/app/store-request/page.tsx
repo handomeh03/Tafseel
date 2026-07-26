@@ -6,15 +6,16 @@ import { Sofa, ArrowLeft } from "lucide-react";
 import { StoreRequestFormData } from "@/features/store/types/storeRequestType";
 import SuccessRequest from "@/features/store/components/SuccessRequest";
 import StoreRequestForm from "@/features/store/components/StoreRequestForm";
+import { useStoreRequest } from "@/features/store/hooks/useStoreRequest";
+
 
 export default function StoreReuestPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
-``
+  const { submitStoreRequest, isPending } = useStoreRequest();
+
   const onSubmit = async (data: StoreRequestFormData) => {
     try {
-      console.log("Submitting DTO Payload:", data);
-
-
+      await submitStoreRequest(data);
       setIsSubmitted(true);
     } catch (error) {
       console.error("Error submitting store request:", error);
@@ -52,7 +53,7 @@ export default function StoreReuestPage() {
           {isSubmitted ? (
             <SuccessRequest handleChange={() => setIsSubmitted(false)} />
           ) : (
-            <StoreRequestForm onSubmit={onSubmit} />
+            <StoreRequestForm onSubmit={onSubmit} isPending={isPending} />
           )}
         </div>
 

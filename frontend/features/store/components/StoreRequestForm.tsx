@@ -9,9 +9,10 @@ import { Button } from "@/components/Button";
 
 interface StoreRequestFormProps {
     onSubmit: (data: StoreRequestFormData) => Promise<void> | void;
+    isPending:boolean;
 }
 
-export default function StoreRequestForm({ onSubmit }: StoreRequestFormProps) {
+export default function StoreRequestForm({ onSubmit,isPending }: StoreRequestFormProps) {
     const {
         register,
         handleSubmit,
@@ -101,7 +102,7 @@ export default function StoreRequestForm({ onSubmit }: StoreRequestFormProps) {
             <Button
                 type="submit"
                 className="w-full"
-                isLoading={isSubmitting}
+                isLoading={isPending}
                 icon={<ArrowLeft className="w-4 h-4" />}
             >
                 إرسال طلب إنشاء المتجر
