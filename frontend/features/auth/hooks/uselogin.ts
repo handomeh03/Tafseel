@@ -5,12 +5,8 @@ import { useRouter } from "next/navigation";
 import api from "@/config/axoisconfig";
 import { toast } from "sonner";
 import { useAuth } from "@/store/Context/UserContext";
+import { LoginFormData } from "../types/loginType";
 
-
-export interface LoginForm {
-  email: string;
-  password: string;
-}
 
 interface LoginResponse {
   accessToken: string;
@@ -35,7 +31,7 @@ export function useLogin() {
   }
 
   const mutation = useMutation({
-    mutationFn: async (loginData: LoginForm): Promise<LoginResponse> => {
+    mutationFn: async (loginData: LoginFormData): Promise<LoginResponse> => {
       const response = await api.post<LoginResponse>("/auth/login", loginData);
       return response.data;
     },
