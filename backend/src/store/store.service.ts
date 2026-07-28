@@ -13,6 +13,7 @@ import { Prisma, RequestStatus, Role } from '@prisma/client';
 import { UpdateRequestStatusDto } from './dto/UpdateRequestStatus.dto';
 import { EmailerService } from 'src/emailer/emailer.service';
 import { CryptSecuirtyService } from 'src/security/Crypt-security.service';
+import { GetAllActiveStore } from './dto/GetAllActiveStore.dto';
 
 @Injectable()
 export class StoreService {
@@ -252,6 +253,66 @@ export class StoreService {
       logger.error('Error processing store request:', error);
 
       throw new InternalServerErrorException( error.message || 'حدث خطأ أثناء معالجة الطلب' );
+    }
+  }
+  async getallActiveStore(GetAllActiveStore: GetAllActiveStore) {
+    try {
+      const { page = 1, limit = 10, search } = GetAllActiveStore;
+      const skip = (page - 1) * limit;
+
+      
+      const where: Prisma.StoreWhereInput = {};
+
+      if (search && search.trim() !== '') {
+        const cleanSearch = search.trim();
+
+        where.OR = [
+          { storeName: { contains: cleanSearch, mode: 'insensitive' } },
+          { description: { contains: cleanSearch, mode: 'insensitive' } },
+          { city: { contains: cleanSearch, mode: 'insensitive' } },
+          {owner:
+            {
+              name:{ contains: cleanSearch, mode: 'insensitive' }
+            }
+          }
+         
+        ];
+      }
+
+  
+      const [stores, totalCount] = await Promise.all([
+        this.database.store.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            owner: {
+              select: {
+                id: true,
+                name:true,
+                email: true,
+                phone: true,
+              },
+            },
+          },
+        }),
+        this.database.store.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(totalCount / limit);
+
+      return {
+        data: stores,
+        totalCount,
+        currentPage: page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      };
+    } catch (error) {
+      
+      throw new InternalServerErrorException('حدث خطأ أثناء جلب قائمة المتاجر');
     }
   }
 }
