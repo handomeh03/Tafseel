@@ -18,7 +18,7 @@ export default function SuccessRequest({ handleChange }: SuccessRequestProps) {
         تم إرسال طلبك بنجاح
       </h3>
       <p className="text-xs sm:text-sm text-brand-muted leading-relaxed max-w-sm mx-auto">
-        شكراً لاختيارك منصتنا. سيقوم فريقنا بمراجعة تفاصيل متجرك والتواصل معك عبر رقم الموبايل أو البريد لتفعيل المتجر فوراً.
+        شكراً لاختيارك منصتنا. سيقوم فريقنا بمراجعة تفاصيل متجرك والتواصل معك عبر رقم الموبايل أو البريد لتفعيل المتجر فوراً
       </p>
 
       {/* Action Button */}

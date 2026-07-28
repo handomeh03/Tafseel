@@ -20,7 +20,7 @@ export function useLogin() {
   function getRoleRedirectPath(roleName: string): string {
     switch (roleName) {
       case "SUPER_ADMIN":
-        return "/";
+        return "/admin";
       case "STORE_OWNER":
         return "/";
       case "CUSTOMER":

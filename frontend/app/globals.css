@@ -29,7 +29,7 @@
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
-  direction: rtl; /* جاهز للغة العربية */
+  direction: rtl; 
 }
 
 body {
@@ -50,7 +50,7 @@ body {
 
 /* Custom Styled Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -59,7 +59,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-brand-primary);
-  border-radius: 4px;
+  
 }
 
 ::-webkit-scrollbar-thumb:hover {

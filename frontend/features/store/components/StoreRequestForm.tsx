@@ -23,7 +23,6 @@ export default function StoreRequestForm({ onSubmit,isPending }: StoreRequestFor
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Store Name & Owner Name Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* storeName */}
                 <Input
