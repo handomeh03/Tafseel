@@ -13,7 +13,8 @@ api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const excludedEndpoints = [
       "/auth/login",
-      "/store/request"
+      "/store/request",
+      "/product/public"
     ];
 
     const isExcluded = config.url

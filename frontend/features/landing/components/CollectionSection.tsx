@@ -1,42 +1,36 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, Store } from "lucide-react";
+import { getPublicProducts } from "../api/getPublicProducts";
 
-const categories = [
-  {
-    id: "sofas",
-    title: "أطقم الكنب والزوايا",
-    subtitle: "تصاميم مودرن وكلاسيك جاهزة للتسليم الفوري بجميع الألوان",
-    count: "+32 طقم متاح",
-    image:
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80",
-    href: "/catalog/sofas",
-  },
-  {
-    id: "armchairs",
-    title: "الكراسي والمفردات",
-    subtitle: "كراسي استرخاء وأسرة ديكورية مصنوعة يدويًا بدقة عالية",
-    count: "+18 قطعة",
-    image:
-      "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=1000&q=80",
-    href: "/catalog/armchairs",
-  },
-  {
-    id: "chairs",
-    title: "كراسي السفرة والطاولات",
-    subtitle: "خشب متين مع إسفنج عالي الكثافة وقماش مقاوم للبقع",
-    count: "+24 تصميم",
-    image:
-      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1000&q=80",
-    href: "/catalog/chairs",
-  },
-];
+interface ProductStore {
+  id: string;
+  storeName: string;
+  logo?: string;
+  city?: string;
+}
 
-export default function CollectionSection() {
+interface Product {
+  id: string;
+  title: string;
+  description?: string;
+  price?: number;
+  isAvailable: boolean;
+  images?: string[];
+  image?: string;
+  createdAt: string;
+  store?: ProductStore;
+}
+
+
+
+export default async function CollectionSection() {
+  const products = await getPublicProducts();
+
   return (
-    <section id="catalog" className="relative py-16 md:py-24 bg-main text-brand-dark overflow-hidden">
+    <section id="catalog" className="relative py-16 md:py-24 bg-main text-brand-dark overflow-hidden" dir="rtl">
       
-      {/* Background Accent Subtle Pattern */}
+      
       <div className="absolute top-0 right-1/2 translate-x-1/2 w-full max-w-7xl h-full bg-[radial-gradient(#C87A3E_0.8px,transparent_0.8px)] [background-size:24px_24px] opacity-[0.12] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
@@ -49,7 +43,7 @@ export default function CollectionSection() {
               <span>كتالوج التشكيلة الجاهزة</span>
             </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-brand-dark tracking-tight leading-tight">
-              استكشف مجموعات <span className="text-brand-primary">تفصيل Store</span>
+              استكشف أحدث منتجات <span className="text-brand-primary">تفصيل Store</span>
             </h2>
           </div>
 
@@ -58,51 +52,79 @@ export default function CollectionSection() {
           </p>
         </div>
 
-        {/* Grid of Category Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {categories.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className="group relative flex flex-col justify-between h-[380px] sm:h-[440px] md:h-[480px] rounded-3xl overflow-hidden p-6 sm:p-8 border border-white/20 shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl"
-            >
-              {/* Background Image with Dynamic Scaling */}
-              <div className="absolute inset-0 z-0 bg-neutral-900">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className="object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {products.length > 0 ? (
+            products.slice(0, 3).map((product:Product) => {
+              const productImage =
+                product.images && product.images.length > 0
+                  ? product.images[0]
+                  : product.image ||
+                    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80";
 
-                
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 transition-opacity duration-300 group-hover:opacity-85" />
-              </div>
+              return (
+                <Link
+                  key={product.id}
+                  href={`/catalog/${product.id}`}
+                  className="group relative flex flex-col justify-between h-[380px] sm:h-[420px] rounded-3xl overflow-hidden p-6 border border-white/20 shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl"
+                >
+                  {/* Background Image */}
+                  <div className="absolute inset-0 z-0 bg-neutral-900">
+                    <Image
+                      src={productImage}
+                      alt={product.title}
+                      fill
+                      className="object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    />
 
-              {/* Top Bar inside Card */}
-              <div className="relative z-10 flex items-center justify-between">
-                <span className="bg-white/10 backdrop-blur-md border border-white/20 text-white text-[11px] font-semibold px-3.5 py-1 rounded-full tracking-wide shadow-sm">
-                  {item.count}
-                </span>
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20 transition-opacity duration-300 group-hover:opacity-85" />
+                  </div>
 
-                {/* Action Arrow Icon */}
-                <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center font-bold text-sm shadow-md group-hover:bg-primary-accent group-hover:border-primary-accent group-hover:scale-110 transition-all duration-300">
-                  <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                </div>
-              </div>
+                  {/* Top Bar inside Card */}
+                  <div className="relative z-10 flex items-center justify-between">
+                    {product.store?.storeName ? (
+                      <span className="bg-white/10 backdrop-blur-md border border-white/20 text-white text-[11px] font-semibold px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                        <Store className="w-3 h-3 text-brand-primary" />
+                        <span>{product.store.storeName}</span>
+                      </span>
+                    ) : (
+                      <span className="bg-emerald-500/80 backdrop-blur-md text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow-sm">
+                        متوفر الآن
+                      </span>
+                    )}
 
-              {/* Bottom Content Area */}
-              <div className="relative z-10 text-right space-y-1.5">
-                <h3 className="font-extrabold text-xl sm:text-2xl lg:text-3xl text-white tracking-tight group-hover:text-brand-primary transition-colors duration-300">
-                  {item.title}
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-200 font-light leading-relaxed line-clamp-2">
-                  {item.subtitle}
-                </p>
-              </div>
-            </Link>
-          ))}
+                    {/* Action Arrow Icon */}
+                    <div className="w-9 h-9 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center font-bold text-sm shadow-md group-hover:bg-primary-accent group-hover:border-primary-accent group-hover:scale-110 transition-all duration-300">
+                      <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                    </div>
+                  </div>
+
+                  {/* Bottom Content Area */}
+                  <div className="relative z-10 text-right space-y-1.5">
+                    <h3 className="font-extrabold text-lg sm:text-xl text-white tracking-tight group-hover:text-brand-primary transition-colors duration-300 line-clamp-1">
+                      {product.title}
+                    </h3>
+                    {product.description && (
+                      <p className="text-xs text-gray-200 font-light leading-relaxed line-clamp-2">
+                        {product.description}
+                      </p>
+                    )}
+                    {product.price && (
+                      <p className="text-sm font-black text-brand-primary pt-1">
+                        {product.price} د.أ
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              );
+            })
+          ) : (
+            <div className="col-span-full py-12 text-center text-brand-muted text-sm">
+              لا توجد منتجات مجهزة للعرض حالياً
+            </div>
+          )}
         </div>
 
       </div>

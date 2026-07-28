@@ -6,7 +6,7 @@ import Navbar from "@/features/landing/components/Navbar";
 import CollectionSection from "@/features/landing/components/CollectionSection";
 
 export const metadata: Metadata = {
-  title: "منجّد Store | أطقم كنب وأثاث جاهز من أفضل المحلات",
+  title: "تفصيل Store | أطقم كنب وأثاث جاهز من أفضل المحلات",
   description:
     "تصفح واشترِ أحدث أطقم الكنب الجاهزة للتسليم الفوري من أفضل ورش ومعارض التنجيد المحلية بضغطة زر.",
   keywords: [
