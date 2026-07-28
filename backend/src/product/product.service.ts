@@ -7,8 +7,9 @@ import {
 import { CreateProductDto } from './dto/create-product.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { getAllProductDto } from './dto/getAllProduct.dto';
 import { Prisma } from '@prisma/client';
+import { getProductDto } from './dto/getProduct.dto';
+
 
 @Injectable()
 export class ProductService {
@@ -43,7 +44,135 @@ export class ProductService {
     }
   }
 
-  async getAllProduct(queryDto: getAllProductDto, ownerId: number) {
+  async getPublicProduct(queryDto: getProductDto) {
+    try {
+      const { page = 1, limit = 10, search } = queryDto;
+      const skip = (page - 1) * limit;
+
+
+      const where: Prisma.ProductWhereInput = {
+        isAvailable: true,
+      };
+
+      
+      if (search && search.trim() !== '') {
+        const cleanSearch = search.trim();
+
+        where.OR = [
+          { title: { contains: cleanSearch, mode: 'insensitive' } },
+          { description: { contains: cleanSearch, mode: 'insensitive' } },
+          {
+          store: {
+            storeName: { contains: cleanSearch, mode: 'insensitive' },
+          },
+          }
+        ];
+      }
+      const [products, totalCount] = await Promise.all([
+        this.database.product.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            store: {
+              select: {
+                id: true,
+                storeName: true,
+                logo: true,
+                city: true,
+              },
+            },
+          },
+        }),
+        this.database.product.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(totalCount / limit);
+
+      
+      return {
+        data: products,
+        totalCount,
+        currentPage: page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      };
+    } catch (error) {
+      console.error('Error fetching public products:', error);
+      throw new InternalServerErrorException(
+        'حدث خطأ أثناء جلب المنتجات العامة',
+      );
+    }
+  }
+
+async getAdminProduct(queryDto: getProductDto) {
+    try {
+      const { page = 1, limit = 10, search } = queryDto;
+      const skip = (page - 1) * limit;
+
+      
+      const where: Prisma.ProductWhereInput = {};
+
+      
+      if (search && search.trim() !== '') {
+        const cleanSearch = search.trim();
+
+        where.OR = [
+          { title: { contains: cleanSearch, mode: 'insensitive' } },
+          { description: { contains: cleanSearch, mode: 'insensitive' } },
+  
+          {
+            store: {
+              storeName: { contains: cleanSearch, mode: 'insensitive' },
+            },
+          },
+       
+        ];
+      }
+
+      const [products, totalCount] = await Promise.all([
+        this.database.product.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            store: {
+              select: {
+                id: true,
+                storeName: true,
+                logo: true,
+                city: true,
+              },
+            },
+          },
+        }),
+        this.database.product.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(totalCount / limit);
+
+      return {
+        data: products,
+        totalCount,
+        currentPage: page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      };
+    } catch (error) {
+      console.error('Error fetching admin products:', error);
+      throw new InternalServerErrorException(
+        'حدث خطأ أثناء جلب قائمة المنتجات للإدارة',
+      );
+    }
+  }
+
+  async getStoreProduct(queryDto: getProductDto, ownerId: number) {
+
+    
     try {
       const store = await this.database.store.findUnique({
         where: { ownerId },
@@ -101,79 +230,110 @@ export class ProductService {
   }
 
   async editProduct(
-    updateProductDto: UpdateProductDto,
-    ownerId: number,
-    productId: number,
-  ) {
-    try {
-      const product = await this.database.product.findFirst({
-        where: {
-          id: productId,
-          store: {
-            ownerId: ownerId,
-          },
-        },
-      });
+  updateProductDto: UpdateProductDto,
+  userId: number,
+  productId: number,
+) {
+  try {
+    const user = await this.database.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
 
-      if (!product) {
-        throw new NotFoundException(
-          'المنتج غير موجود أو ليس لديك صلاحية الوصول إليه',
-        );
-      }
+    if (!user) {
+      throw new NotFoundException('المستخدم غير موجود');
+    }
 
-      await this.database.product.update({
-        where: { id: productId },
-        data: updateProductDto,
-      });
+    const isAdmin = user.role === 'SUPER_ADMIN';
 
-      return { message: 'تم تحديث المنتج بنجاح' };
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ForbiddenException
-      ) {
-        throw error;
-      }
+    const whereCondition: Prisma.ProductWhereInput = {
+      id: productId,
+      ...(isAdmin
+        ? {} 
+        : { store: { ownerId: userId } }),
+    };
 
-      throw new InternalServerErrorException(
-        'فشل في تحديث المنتج',
+    // 3️⃣ التحقق من وجود المنتج وصلاحية الوصول
+    const product = await this.database.product.findFirst({
+      where: whereCondition,
+    });
+
+    if (!product) {
+      throw new NotFoundException(
+        'المنتج غير موجود أو ليس لديك صلاحية الوصول إليه',
       );
     }
+
+
+    const updatedProduct = await this.database.product.update({
+      where: { id: productId },
+      data: updateProductDto,
+    });
+
+    return {
+      message: 'تم تحديث المنتج بنجاح',
+      data: updatedProduct,
+    };
+  } catch (error) {
+    if (
+      error instanceof NotFoundException ||
+      error instanceof ForbiddenException
+    ) {
+      throw error;
+    }
+
+    throw new InternalServerErrorException('فشل في تحديث المنتج');
   }
+}
 
-  async deleteProduct(ownerId: number, productId: number) {
-    try {
-      const product = await this.database.product.findFirst({
-        where: {
-          id: productId,
-          store: {
-            ownerId: ownerId,
-          },
-        },
-      });
+  async deleteProduct(userId: number, productId: number) {
+  try {
+    
+    const user = await this.database.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
 
-      if (!product) {
-        throw new NotFoundException(
-          'المنتج غير موجود أو ليس لديك صلاحية الوصول إليه',
-        );
-      }
+    if (!user) {
+      throw new NotFoundException('المستخدم غير موجود');
+    }
 
-      await this.database.product.delete({
-        where: { id: productId },
-      });
+    const isAdmin = user.role === 'SUPER_ADMIN' ;
 
-      return { message: 'تم حذف المنتج بنجاح' };
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ForbiddenException
-      ) {
-        throw error;
-      }
+  
+    const whereCondition: Prisma.ProductWhereInput = {
+      id: productId,
+      ...(isAdmin
+        ? {} 
+        : { store: { ownerId: userId } }), 
+    };
 
-      throw new InternalServerErrorException(
-        'فشل في حذف المنتج',
+  
+    const product = await this.database.product.findFirst({
+      where: whereCondition,
+    });
+
+    if (!product) {
+      throw new NotFoundException(
+        'المنتج غير موجود أو ليس لديك صلاحية الوصول إليه',
       );
     }
+
+  
+    await this.database.product.delete({
+      where: { id: productId },
+    });
+
+    return { message: 'تم حذف المنتج بنجاح' };
+  } catch (error) {
+    if (
+      error instanceof NotFoundException ||
+      error instanceof ForbiddenException
+    ) {
+      throw error;
+    }
+
+    throw new InternalServerErrorException('فشل في حذف المنتج');
   }
+}
 }

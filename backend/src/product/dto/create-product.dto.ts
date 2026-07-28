@@ -5,6 +5,7 @@ import {
   IsArray,
   IsNotEmpty,
   Min,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -21,6 +22,11 @@ export class CreateProductDto {
   @Min(0, { message: 'السعر لا يمكن أن يكون أقل من صفر' })
   @Type(() => Number)
   price!: number;
+
+ @IsBoolean ({ message: 'حالة التوفر يجب أن تكون قيمة منطقية (صح/خطأ)' })
+  @IsOptional()
+  @Type(() => Boolean)
+  isAvailable?: boolean;
 
   @IsArray({ message: 'الصور يجب أن تكون على شكل مصفوفة' })
   @IsString({ each: true, message: 'كل صورة يجب أن تكون نصًا' })

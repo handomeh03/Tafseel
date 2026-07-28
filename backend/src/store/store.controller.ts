@@ -7,6 +7,7 @@ import { IsPublic } from 'src/auth/Decorators/Public.decorator';
 import { Roles } from 'src/auth/Decorators/Role.decorator';
 import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/auth/Guards/RolesGuard';
+import { GetAllActiveStore } from './dto/GetAllActiveStore.dto';
 
 
 @Controller('store')
@@ -21,16 +22,24 @@ export class StoreController {
 
   @Roles(Role.SUPER_ADMIN)
   @UseGuards(RolesGuard)
-  @Get("request")
+  @Get("get-requests")
   async getAllRequest(@Query() GetAllRequestDto: GetAllRequestDto) {
     return await this.storeService.getAllRequest(GetAllRequestDto);
   }
 
+
   @Roles(Role.SUPER_ADMIN)
   @UseGuards(RolesGuard)
-  @Patch("request/:id/status")
+  @Patch("edit-request/:id/status")
   async updateRequestStatus(@Param('id', ParseIntPipe) id: number, @Body() UpdateRequestStatusDto: UpdateRequestStatusDto) {
     return await this.storeService.approveRequest(id, UpdateRequestStatusDto);
+  }
+
+  @Roles(Role.SUPER_ADMIN)
+  @UseGuards(RolesGuard)
+  @Get("get-activestore")
+  async getAllActiveStore(@Query() GetAllActiveStore: GetAllActiveStore) {
+    return await this.storeService.getallActiveStore(GetAllActiveStore);
   }
 
 
