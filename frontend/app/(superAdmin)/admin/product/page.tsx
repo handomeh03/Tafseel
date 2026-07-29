@@ -13,9 +13,9 @@ import {
   Edit,
   Trash2,
   MoreVertical,
+  Layers,
 } from "lucide-react";
 import { useGetProducts } from "@/features/Product/hooks/useGetProduct";
-
 
 import Pagination from "@/components/Pagenation";
 import ProductDetailsModal from "@/features/Product/components/ProductDetailsModal";
@@ -23,8 +23,16 @@ import ConfirmDeleteModal from "@/features/Product/components/ConfirmDeleteModal
 
 import EditProductSheet from "@/features/Product/components/EditProductSheet";
 import { useDeleteProduct } from "@/features/Product/hooks/useDeleteProduct";
+import { ProductCategory } from "@/features/Product/types/productCategory";
 
-
+// 🗺️ قاموس ترجمة قيم الـ Enum للغة العربية
+const CATEGORY_LABELS: Record<ProductCategory, string> = {
+  [ProductCategory.SOFAS]: "أطقم كنبات",
+  [ProductCategory.TABLES]: "طاولات وطعام",
+  [ProductCategory.BEDROOMS]: "غرف نوم",
+  [ProductCategory.DECOR]: "ديكورات وإكسسوارات",
+  [ProductCategory.OTHER]: "تصنيفات أخرى",
+};
 
 interface ProductStore {
   id: string;
@@ -38,6 +46,7 @@ interface Product {
   title: string;
   description?: string;
   price?: number;
+  category?: ProductCategory; // 👈 إضافة حقل التصنيف للـ Interface
   isAvailable: boolean;
   images?: string[];
   image?: string;
@@ -157,7 +166,6 @@ export default function AdminProductsPage() {
     setCurrentPage(1);
   };
 
-
   const handleEdit = (product: Product) => {
     setActiveMenuId(null);
     setProductToEdit(product);
@@ -220,6 +228,7 @@ export default function AdminProductsPage() {
               <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 font-semibold text-xs">
                 <tr>
                   <th className="p-4">المنتج</th>
+                  <th className="p-4">التصنيف</th> 
                   <th className="p-4">المتجر</th>
                   <th className="p-4">السعر</th>
                   <th className="p-4">حالة التوفر</th>
@@ -258,6 +267,18 @@ export default function AdminProductsPage() {
                               </p>
                             )}
                           </div>
+                        </td>
+
+                        
+                        <td className="p-4">
+                          {product.category ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary-accent/10 text-primary-accent text-xs font-bold">
+                              <Layers className="w-3 h-3" />
+                              <span>{CATEGORY_LABELS[product.category]}</span>
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 text-xs">غير محدد</span>
+                          )}
                         </td>
 
                         {/* Store Name */}
@@ -340,7 +361,7 @@ export default function AdminProductsPage() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-gray-400 text-sm">
+                    <td colSpan={7} className="p-8 text-center text-gray-400 text-sm">
                       لا توجد منتجات مطابقة للبحث حالياً.
                     </td>
                   </tr>
@@ -363,7 +384,7 @@ export default function AdminProductsPage() {
         )}
       </div>
 
-      
+      {/* Modals & Sheets */}
       {selectedProduct && (
         <ProductDetailsModal
           selectedProduct={selectedProduct}
@@ -371,14 +392,12 @@ export default function AdminProductsPage() {
         />
       )}
 
-      
       <EditProductSheet
         isOpen={Boolean(productToEdit)}
         product={productToEdit}
         onClose={() => setProductToEdit(null)}
       />
 
-      
       {productToDelete && (
         <ConfirmDeleteModal
           isOpen={Boolean(productToDelete)}

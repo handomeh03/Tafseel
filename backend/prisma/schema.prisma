@@ -48,16 +48,45 @@ model Product {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
+  category    ProductCategory @default(OTHER)
   price       Float
   images      String[] 
   isAvailable Boolean  @default(true)
   storeId     Int
   store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
-
+  orders      Order[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([storeId])
+}
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  orderNumber     String      @unique
+  status          OrderStatus @default(PENDING)
+  
+  customerName    String
+  customerPhone   String
+  city            String
+  shippingAddress String
+  notes           String?
+
+
+  productId       Int
+  product         Product     @relation(fields: [productId], references: [id], onDelete: Restrict)
+  
+  quantity        Int         @default(1)
+  unitPrice       Float
+  deliveryPrice   Float       @default(0)      
+  totalPrice      Float      
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([customerPhone])
+  @@index([orderNumber])
+  @@index([productId])
 }
 
 model StoreRequest {
@@ -88,4 +117,19 @@ enum RequestStatus {
   PENDING   
   APPROVED  
   REJECTED  
+}
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+enum ProductCategory {
+  SOFAS
+  TABLES
+  BEDROOMS
+  DECOR
+  OTHER
 }

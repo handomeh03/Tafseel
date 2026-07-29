@@ -22,7 +22,7 @@ export function useLogin() {
       case "SUPER_ADMIN":
         return "/admin";
       case "STORE_OWNER":
-        return "/";
+        return "/storeowner";
       case "CUSTOMER":
         return "/";
       default:

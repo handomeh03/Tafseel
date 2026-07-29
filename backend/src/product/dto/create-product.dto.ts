@@ -6,8 +6,11 @@ import {
   IsNotEmpty,
   Min,
   IsBoolean,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ProductCategory } from '@prisma/client';
+
 
 export class CreateProductDto {
   @IsString({ message: 'عنوان المنتج يجب أن يكون نصًا' })
@@ -18,12 +21,16 @@ export class CreateProductDto {
   @IsOptional()
   description?: string;
 
-  @IsNumber({}, { message: 'السعر يجب أن يكون رقمًا صحيحًا' })
+  @IsNumber({}, { message: 'السعر يجب أن يكون رقمًا' })
   @Min(0, { message: 'السعر لا يمكن أن يكون أقل من صفر' })
   @Type(() => Number)
   price!: number;
 
- @IsBoolean ({ message: 'حالة التوفر يجب أن تكون قيمة منطقية (صح/خطأ)' })
+  @IsEnum(ProductCategory, { message: 'تصنيف المنتج غير صالح' }) 
+  @IsNotEmpty({ message: 'تصنيف المنتج مطلوب' })
+  category!: ProductCategory;
+
+  @IsBoolean({ message: 'حالة التوفر يجب أن تكون قيمة منطقية (صح/خطأ)' })
   @IsOptional()
   @Type(() => Boolean)
   isAvailable?: boolean;

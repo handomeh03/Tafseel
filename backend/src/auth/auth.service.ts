@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   HttpException,
   Injectable,
@@ -12,6 +13,7 @@ import { LoginDto } from './dto/LoginDto';
 import { DatabaseService } from 'src/database/database.service';
 import { CryptSecuirtyService } from 'src/security/Crypt-security.service';
 import { TokensService } from 'src/security/tokens.service';
+import { changePasswordDto } from './dto/changePassword.dto';
 
 @Injectable()
 export class AuthService {
@@ -110,6 +112,61 @@ async getme(userId: number) {
       
      
       throw new InternalServerErrorException("حدث خطأ في السيرفر أثناء جلب بيانات المستخدم");
+    }
+  }
+async changePassword(changePasswordDto: changePasswordDto, userId: number) {
+    const { oldPassword, newPassword } = changePasswordDto;
+
+    try {
+      
+      const user = await this.database.user.findUnique({
+        where: { id: userId },
+        select: { password: true },
+      });
+
+      if (!user) {
+        throw new NotFoundException('المستخدم غير موجود');
+      }
+
+      
+      const passwordMatch = await this.cryptSecurityService.compare(
+        oldPassword,
+        user.password,
+      );
+
+      if (!passwordMatch) {
+        throw new BadRequestException('كلمة المرور القديمة غير صحيحة');
+      }
+
+      
+      const isSamePassword = await this.cryptSecurityService.compare(
+        newPassword,
+        user.password,
+      );
+
+      if (isSamePassword) {
+        throw new BadRequestException(
+          'كلمة المرور الجديدة يجب أن تكون مختلفة عن كلمة المرور الحالية',
+        );
+      }
+
+     
+      const hashNewPassword = await this.cryptSecurityService.hash(
+        newPassword,
+        10,
+      );
+
+      await this.database.user.update({
+        where: { id: userId },
+        data: { password: hashNewPassword },
+      });
+
+      return { message: 'تم تغيير كلمة المرور بنجاح' };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('حدث خطأ غير متوقع أثناء تغيير كلمة المرور' );
     }
   }
 }
