@@ -46,7 +46,7 @@ export class ProductService {
 
   async getPublicProduct(queryDto: getProductDto) {
     try {
-      const { page = 1, limit = 10, search } = queryDto;
+      const { page = 1, limit = 10, search,category } = queryDto;
       const skip = (page - 1) * limit;
 
 
@@ -54,7 +54,10 @@ export class ProductService {
         isAvailable: true,
       };
 
-      
+      if (category) {
+      where.category = category;
+    }
+
       if (search && search.trim() !== '') {
         const cleanSearch = search.trim();
 
@@ -90,7 +93,6 @@ export class ProductService {
 
       const totalPages = Math.ceil(totalCount / limit);
 
-      
       return {
         data: products,
         totalCount,
@@ -99,6 +101,9 @@ export class ProductService {
         hasNextPage: page < totalPages,
         hasPreviousPage: page > 1,
       };
+
+      
+     
     } catch (error) {
       console.error('Error fetching public products:', error);
       throw new InternalServerErrorException(
@@ -109,13 +114,16 @@ export class ProductService {
 
 async getAdminProduct(queryDto: getProductDto) {
     try {
-      const { page = 1, limit = 10, search } = queryDto;
+      const { page = 1, limit = 10, search,category } = queryDto;
       const skip = (page - 1) * limit;
 
       
       const where: Prisma.ProductWhereInput = {};
 
-      
+      if (category) {
+      where.category = category;
+    }
+
       if (search && search.trim() !== '') {
         const cleanSearch = search.trim();
 
@@ -182,12 +190,16 @@ async getAdminProduct(queryDto: getProductDto) {
         throw new NotFoundException('لم يتم العثور على المتجر لهذا المستخدم');
       }
 
-      const { page = 1, limit = 10, search } = queryDto;
+      const { page = 1, limit = 10, search ,category} = queryDto;
       const skip = (page - 1) * limit;
 
       const where: Prisma.ProductWhereInput = {
         storeId: store.id,
       };
+
+      if (category) {
+      where.category = category;
+    }
 
       if (search && search.trim() !== '') {
         const cleanSearch = search.trim();
@@ -198,12 +210,22 @@ async getAdminProduct(queryDto: getProductDto) {
         ];
       }
 
-      const [products, totalCount] = await Promise.all([
+       const [products, totalCount] = await Promise.all([
         this.database.product.findMany({
           where,
           skip,
           take: limit,
           orderBy: { createdAt: 'desc' },
+          include: {
+            store: {
+              select: {
+                id: true,
+                storeName: true,
+                logo: true,
+                city: true,
+              },
+            },
+          },
         }),
         this.database.product.count({ where }),
       ]);
@@ -253,7 +275,7 @@ async getAdminProduct(queryDto: getProductDto) {
         : { store: { ownerId: userId } }),
     };
 
-    // 3️⃣ التحقق من وجود المنتج وصلاحية الوصول
+    
     const product = await this.database.product.findFirst({
       where: whereCondition,
     });

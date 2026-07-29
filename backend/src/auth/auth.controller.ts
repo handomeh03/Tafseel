@@ -1,10 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { LoginDto } from './dto/LoginDto';
 import type { Request, Response } from 'express';
 import { IsPublic } from './Decorators/Public.decorator';
+import { changePasswordDto } from './dto/changePassword.dto';
+import { Roles } from './Decorators/Role.decorator';
+import { Role } from '@prisma/client';
+import { RolesGuard } from './Guards/RolesGuard';
 
 @Controller('auth')
 export class AuthController {
@@ -27,6 +31,16 @@ export class AuthController {
     return {accessToken,role};
   }
 
+  @Roles(Role.STORE_OWNER,Role.STORE_OWNER)
+  @UseGuards(RolesGuard)
+  @Patch("change-password")
+  async changepassword(@Body() changePasswordDto:changePasswordDto,@Req() req: Request){
+    const user = req['user'];
+    const userId = user.sub;
+     return await this.authService.changePassword(changePasswordDto,userId)
+  }
+
+ 
   @Get("me")
   async getme( @Req() req: Request){
      const user = req['user'];

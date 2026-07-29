@@ -115,7 +115,7 @@ export default function StoreRequestsPage() {
         </div>
       </div>
 
-      {/* 3️⃣ Requests Table */}
+      
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm relative">
         {isLoading ? (
           <div className="p-12 text-center text-gray-500 flex flex-col items-center justify-center gap-2">

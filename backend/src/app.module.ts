@@ -10,11 +10,12 @@ import { EmailerModule } from './emailer/emailer.module';
 import { ProductModule } from './product/product.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/Guards/AuthGuard';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [DatabaseModule, ConfigModule.forRoot({
     isGlobal: true,
-  }), AuthModule, SecurityModule, StoreModule, EmailerModule, ProductModule,],
+  }), AuthModule, SecurityModule, StoreModule, EmailerModule, ProductModule, OrderModule,],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_GUARD,

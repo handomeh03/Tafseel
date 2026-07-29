@@ -5,19 +5,18 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  
   --font-sans: 'Tajawal', 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  
-  --color-main-bg: #FDFBF7;     
-  --color-card-bg: #FFFFFF;      
-  --color-hero-bg: #1F1610;      
-  --color-brand-primary: #C87A3E;
-  --color-brand-accent: #2B3A33; 
-  --color-brand-dark: #1F1610;   
-  --color-brand-muted: #6E6259;  
-  --color-brand-light: #F6F2EA;  
-  --color-border-subtle: #E8E1D5;
+
+  --color-main-bg: #FCFBFA;      
+  --color-card-bg: #FFFFFF;     
+  --color-hero-bg: #18120F;     
+  --color-brand-primary: #E65F2B;
+  --color-brand-accent: #111827; 
+  --color-brand-dark: #1F2937;   
+  --color-brand-muted: #6B7280;  
+  --color-brand-light: #FFF4F0;  
+  --color-border-subtle: #E5E7EB; 
 }
 
 :root {
@@ -50,7 +49,7 @@ body {
 
 /* Custom Styled Scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -59,11 +58,11 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-brand-primary);
-  
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-brand-dark);
+  background: var(--color-brand-accent);
 }
 
 /* Custom Utility Classes */

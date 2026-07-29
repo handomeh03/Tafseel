@@ -9,7 +9,8 @@ export function useGetProducts(
   url: string,
   currentPage: number = 1,
   pageSize: number = 10,
-  search?: string
+  search?: string,
+  
 ) {
   const [debouncedSearch] = useDebounce(search, 500);
 
@@ -35,6 +36,7 @@ export function useGetProducts(
             search: debouncedSearch || undefined,
             page: currentPage,
             limit: pageSize,
+            
           },
         });
 

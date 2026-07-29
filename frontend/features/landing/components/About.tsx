@@ -26,7 +26,7 @@ export default function About() {
           </p>
         </div>
 
-        {/* High-End Feature Cards (Bento/Modern Grid) */}
+        
         <div className="grid md:grid-cols-3 gap-8">
           
           {/* Card 1 */}
@@ -91,7 +91,7 @@ export default function About() {
 
         </div>
 
-        {/* Bottom Hero-Style Banner */}
+        
         <div className="relative rounded-3xl bg-hero text-white p-8 sm:p-12 border border-white/10 overflow-hidden shadow-2xl">
           
           {/* Subtle Glows */}
@@ -108,7 +108,7 @@ export default function About() {
             </div>
 
             <Link
-              href="#collection"
+               href="/product"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-primary-accent text-white font-bold text-sm hover:opacity-90 transition-all shadow-lg hover:shadow-brand-primary/25 shrink-0"
             >
               <span>تصفح التشكيلة الكاملة</span>

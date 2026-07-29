@@ -1,21 +1,25 @@
 import { Type } from "class-transformer";
-import { IsInt, IsOptional, IsString, Min } from "class-validator";
+import { IsEnum, IsInt, IsOptional, IsString, Min } from "class-validator";
+import { ProductCategory } from "@prisma/client"; 
 
-export class getProductDto{
-     @IsOptional()
-      @Type(() => Number)
-      @IsInt()
-      @Min(1)
-      page?: number = 1;
-    
-      @IsOptional()
-      @Type(() => Number)
-      @IsInt()
-      @Min(1)
-      limit?: number = 10;
-    
-      @IsOptional()
-      @IsString()
-      search?: string;
-    
+export class getProductDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 10;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @IsOptional()
+  @IsEnum(ProductCategory, { message: "تصنيف المنتج غير صالح" })
+  category?: ProductCategory;
 }

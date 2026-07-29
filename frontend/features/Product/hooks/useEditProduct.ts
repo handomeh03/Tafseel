@@ -4,13 +4,15 @@ import api from "@/config/axoisconfig";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
-
+import { ProductCategory } from "../types/productCategory"; 
 
 export interface UpdateProductPayload {
   title?: string;
   description?: string;
   price?: number;
+  category?: ProductCategory;
   isAvailable?: boolean;
+  images?: string[];
 }
 
 export function useEditProduct() {
@@ -35,12 +37,10 @@ export function useEditProduct() {
     },
 
     onSuccess: (data) => {
-      
       toast.success(data?.message || "تم تحديث المنتج بنجاح");
       queryClient.invalidateQueries({
         queryKey: ["products"],
       });
-     
     },
 
     onError: (error) => {

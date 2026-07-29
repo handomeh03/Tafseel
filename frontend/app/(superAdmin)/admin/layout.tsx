@@ -23,6 +23,7 @@ const navItems = [
   { name: "طلبات المتاجر", href: "/admin/store-requests", icon: ClipboardList },
   { name: "المتاجر النشطة", href: "/admin/stores", icon: Store },
   { name: " جميع المنتجات", href: "/admin/product", icon: Package },
+  { name: " جميع الطلبات", href: "/admin/orders", icon: Package },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -34,7 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
         <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row text-brand-dark" dir="rtl">
       
-      {/* 1️⃣ Mobile Top Header */}
+      
       <header className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
         <Link href="/admin" className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-primary-accent text-white flex items-center justify-center font-bold shadow-sm">
@@ -55,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
       </header>
 
-      {/* 2️⃣ Mobile Overlay Backdrop */}
+      
       {isMobileMenuOpen && (
         <div
           onClick={() => setIsMobileMenuOpen(false)}
@@ -63,7 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
 
-      {/* 3️⃣ Sidebar Component (Responsive for Desktop & Mobile) */}
+      
       <aside
         className={`
           fixed md:sticky top-0 right-0 z-50 md:z-auto
@@ -73,7 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         `}
       >
         <div className="space-y-8">
-          {/* Brand Logo & Close button for mobile */}
+          
           <div className="flex items-center justify-between px-2">
             <Link href="/" className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary-accent text-white flex items-center justify-center font-bold shadow-sm">
@@ -97,7 +98,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
           </div>
 
-          {/* Navigation Links */}
+          
           <nav className="space-y-1.5">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -121,7 +122,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
         </div>
 
-        {/* User Info & Logout Button */}
+        
         <div className="border-t border-gray-100 pt-4 space-y-3">
           <div className="px-2">
             <p className="text-sm font-bold text-gray-900 truncate">
@@ -141,7 +142,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* 4️⃣ Main Content Wrapper */}
+      
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
           {children}

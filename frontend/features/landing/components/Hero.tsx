@@ -85,7 +85,7 @@ export default function Hero() {
           </h1>
 
           <p className="text-gray-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-xl font-light">
-            تصفح أحدث الموديلات والألوان الجاهزة للتسليم الفوري. اختر التصميم اللي بيناسب ذوقك واطلبه مباشرة من المحل المُصنّع بضغطة زر.
+            تصفح أحدث الموديلات والألوان الجاهزة للتسليم الفوري. اختر التصميم اللي بيناسب ذوقك واطلبه مباشرة من المحل المُصنّع بضغطة زر
           </p>
 
           {/* Bullet Points */}
@@ -107,7 +107,7 @@ export default function Hero() {
           {/* CTA Button */}
           <div className="pt-2 sm:pt-4">
             <Link
-              href="#collection"
+               href="/product"
               className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-xl bg-primary-accent text-white font-bold text-center text-xs sm:text-sm hover:opacity-90 transition-all shadow-lg active:scale-95"
             >
               <span>استكشف الموديلات الجاهزة</span>

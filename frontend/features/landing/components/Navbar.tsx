@@ -2,15 +2,35 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Sofa, Store, User, LogIn, LogOut, Menu, X, Search } from "lucide-react";
+import {
+  Sofa,
+  Store,
+  LogIn,
+  LogOut,
+  Menu,
+  X,
+  Search,
+  PackageSearch,
+  LayoutDashboard,
+} from "lucide-react";
 import { useAuth } from "@/store/Context/UserContext";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isLoading, logout } = useAuth();
 
+  
+  const getDashboardHref = () => {
+    if (user?.role === "SUPER_ADMIN") return "/admin";
+    if (user?.role === "STORE_OWNER") return "/storeowner";
+    return "/";
+  };
+
+  const isManagementRole =
+    user?.role === "SUPER_ADMIN" || user?.role === "STORE_OWNER";
+
   return (
-    <header className="sticky top-0 z-50 bg-main/90 backdrop-blur-md border-b border-subtle">
+    <header className="sticky top-0 z-50 bg-main/90 backdrop-blur-md border-b border-subtle" dir="rtl">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         
         {/* Brand Logo */}
@@ -25,12 +45,22 @@ export default function Navbar() {
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-brand-muted">
-          <Link href="/store-request" className="hover:text-brand-dark transition-colors inline-flex items-center gap-2">
+          <Link
+            href="/store-request"
+            className="hover:text-brand-dark transition-colors inline-flex items-center gap-2"
+          >
             <Store className="w-4 h-4 text-brand-primary" />
             <span>طلب متجر خاص</span>
           </Link>
 
-          {/* أثناء التحميل وفحص التوكن بالـ Context */}
+          <Link
+            href="/myorder"
+            className="hover:text-brand-dark transition-colors inline-flex items-center gap-2"
+          >
+            <PackageSearch className="w-4 h-4 text-brand-primary" />
+            <span>تتبع طلبي</span>
+          </Link>
+
           {isLoading ? (
             <div className="flex items-center gap-6">
               <div className="w-20 h-5 bg-gray-200/60 rounded-md animate-pulse" />
@@ -38,40 +68,45 @@ export default function Navbar() {
             </div>
           ) : user ? (
             <>
-              {/* حسابك زر مستقل + تسجيل الخروج */}
-              <Link href="/profile" className="hover:text-brand-dark transition-colors inline-flex items-center gap-2">
-                <User className="w-4 h-4 text-brand-primary" />
-                <span>حسابك</span>
-              </Link>
               
+              {isManagementRole && (
+                <Link
+                  href={getDashboardHref()}
+                  className="hover:text-brand-dark transition-colors inline-flex items-center gap-2"
+                >
+                  <LayoutDashboard className="w-4 h-4 text-brand-primary"  />
+                  <span>لوحة التحكم</span>
+                </Link>
+              )}
+
               <button
                 onClick={logout}
                 type="button"
-                className="hover:text-red-600 transition-colors inline-flex items-center gap-2 text-brand-muted"
+                className="hover:text-red-600 transition-colors inline-flex items-center gap-2 text-brand-muted cursor-pointer"
               >
                 <LogOut className="w-4 h-4 text-red-500" />
                 <span>تسجيل خروج</span>
               </button>
             </>
           ) : (
-            <>
-              {/* خيارات الزائر العادي */}
-              <Link href="/login" className="hover:text-brand-dark transition-colors inline-flex items-center gap-2">
-                <LogIn className="w-4 h-4 text-brand-primary" />
-                <span>تسجيل دخول</span>
-              </Link>
-            </>
+            <Link
+              href="/login"
+              className="hover:text-brand-dark transition-colors inline-flex items-center gap-2"
+            >
+              <LogIn className="w-4 h-4 text-brand-primary" />
+              <span>تسجيل دخول</span>
+            </Link>
           )}
         </nav>
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">
           <Link
-            href="#collection"
+            href="/product"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-accent text-white text-sm font-semibold hover:opacity-90 transition-all shadow-sm"
           >
             <Search className="w-4 h-4" />
-            <span>تصفح الكنب الآن</span>
+            <span>تصفح المنتجات الآن</span>
           </Link>
         </div>
 
@@ -82,11 +117,7 @@ export default function Navbar() {
           className="md:hidden p-2 rounded-lg text-brand-dark hover:bg-brand-light transition-colors"
           aria-label="Toggle menu"
         >
-          {isMenuOpen ? (
-            <X className="w-6 h-6" />
-          ) : (
-            <Menu className="w-6 h-6" />
-          )}
+          {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
@@ -94,13 +125,22 @@ export default function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden border-b border-subtle bg-main px-6 py-6 space-y-4">
           <nav className="flex flex-col space-y-3 font-medium text-brand-muted text-sm">
-            <Link 
-              href="/store-request" 
+            <Link
+              href="/store-request"
               onClick={() => setIsMenuOpen(false)}
               className="inline-flex items-center gap-2 py-1 hover:text-brand-dark transition-colors"
             >
               <Store className="w-4 h-4 text-brand-primary" />
               <span>طلب متجر خاص</span>
+            </Link>
+
+            <Link
+              href="/myorder"
+              onClick={() => setIsMenuOpen(false)}
+              className="inline-flex items-center gap-2 py-1 hover:text-brand-dark transition-colors"
+            >
+              <PackageSearch className="w-4 h-4 text-brand-primary" />
+              <span>تتبع طلبي</span>
             </Link>
 
             {isLoading ? (
@@ -109,14 +149,16 @@ export default function Navbar() {
               </div>
             ) : user ? (
               <>
-                <Link 
-                  href="/profile" 
-                  onClick={() => setIsMenuOpen(false)}
-                  className="inline-flex items-center gap-2 py-1 hover:text-brand-dark transition-colors"
-                >
-                  <User className="w-4 h-4 text-brand-primary" />
-                  <span>حسابك</span>
-                </Link>
+                {isManagementRole && (
+                  <Link
+                    href={getDashboardHref()}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="inline-flex items-center gap-2 py-1 hover:text-brand-dark transition-colors text-primary-accent font-bold"
+                  >
+                    <LayoutDashboard className="w-4 h-4 text-brand-primary"  />
+                    <span>لوحة التحكم</span>
+                  </Link>
+                )}
 
                 <button
                   onClick={() => {
@@ -124,15 +166,15 @@ export default function Navbar() {
                     logout();
                   }}
                   type="button"
-                  className="inline-flex items-center gap-2 py-1 hover:text-red-600 text-red-500 transition-colors w-full text-right"
+                  className="inline-flex items-center gap-2 py-1 hover:text-red-600 text-red-500 transition-colors w-full text-right cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>تسجيل خروج</span>
                 </button>
               </>
             ) : (
-              <Link 
-                href="/login" 
+              <Link
+                href="/login"
                 onClick={() => setIsMenuOpen(false)}
                 className="inline-flex items-center gap-2 py-1 hover:text-brand-dark transition-colors"
               >
@@ -143,12 +185,12 @@ export default function Navbar() {
           </nav>
 
           <Link
-            href="#collection"
+            href="/product"
             onClick={() => setIsMenuOpen(false)}
             className="inline-flex items-center justify-center gap-2 w-full text-center px-5 py-2.5 rounded-xl bg-primary-accent text-white text-sm font-semibold"
           >
             <Search className="w-4 h-4" />
-            <span>تصفح الكنب الآن</span>
+            <span>تصفح المنتجات الآن</span>
           </Link>
         </div>
       )}

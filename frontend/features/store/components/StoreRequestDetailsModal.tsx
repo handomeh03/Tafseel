@@ -10,9 +10,11 @@ import {
   Phone, 
   Calendar,
   X,
-  Loader2
+  
 } from "lucide-react";
 import { useUpdateStoreRequestStatus } from "../hooks/useUpdateStoreRequestStatus";
+import { Button } from "@/components/Button";
+
 
 interface StoreRequest {
   id: string;
@@ -39,7 +41,6 @@ export default function StoreRequestDetailsModal({
 
   if (!request) return null;
 
-  
   const handleApprove = async () => {
     try {
       await updateStatus({
@@ -47,12 +48,11 @@ export default function StoreRequestDetailsModal({
         status: "APPROVED",
       });
       onClose();
-    } catch (error) {
-    
+    } catch {
+      // Error handling
     }
   };
 
-  
   const handleReject = async () => {
     try {
       await updateStatus({
@@ -60,8 +60,8 @@ export default function StoreRequestDetailsModal({
         status: "REJECTED",
       });
       onClose();
-    } catch (error) {
-      
+    } catch {
+      // Error handling
     }
   };
 
@@ -71,7 +71,6 @@ export default function StoreRequestDetailsModal({
         className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-6 relative border border-gray-100 shadow-2xl overflow-hidden"
         dir="rtl"
       >
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 pb-4">
           <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
             <Building2 className="w-5 h-5 text-primary-accent" />
@@ -86,15 +85,12 @@ export default function StoreRequestDetailsModal({
           </button>
         </div>
 
-        {/* Content Details */}
         <div className="space-y-4 text-sm">
-          {/* Status Bar */}
           <div className="flex items-center justify-between bg-gray-50 p-3 rounded-2xl border border-gray-100">
             <span className="text-xs font-semibold text-gray-500">حالة الطلب الحالية:</span>
             <StatusBadge status={request.status} />
           </div>
 
-          {/* Store & Owner Names */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100">
               <p className="text-xs text-gray-400 font-medium">اسم المتجر</p>
@@ -106,7 +102,6 @@ export default function StoreRequestDetailsModal({
             </div>
           </div>
 
-          {/* Contact Details */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-gray-400 flex items-center gap-1">
@@ -122,7 +117,6 @@ export default function StoreRequestDetailsModal({
             </div>
           </div>
 
-          {/* City & Date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-gray-400 flex items-center gap-1">
@@ -140,7 +134,6 @@ export default function StoreRequestDetailsModal({
             </div>
           </div>
 
-          {/* Notes */}
           {request.notes && (
             <div>
               <p className="text-xs text-gray-400 font-medium">ملاحظات الطلب</p>
@@ -151,26 +144,25 @@ export default function StoreRequestDetailsModal({
           )}
         </div>
 
-        {/* Action Buttons */}
         {request.status === "PENDING" && (
           <div className="flex flex-col sm:flex-row gap-2.5 pt-4 border-t border-gray-100">
-            <button
+            <Button
               onClick={handleApprove}
-              disabled={isPending}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+              isLoading={isPending}
+              icon={<CheckCircle2 className="w-4 h-4" />}
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 py-2.5 text-xs shadow-emerald-600/20"
             >
-              {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-              <span>قبول الطلب وإنشاء المتجر</span>
-            </button>
+              قبول الطلب وإنشاء المتجر
+            </Button>
 
-            <button
+            <Button
               onClick={handleReject}
-              disabled={isPending}
-              className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors border border-red-200/50 disabled:opacity-50"
+              isLoading={isPending}
+              icon={<XCircle className="w-4 h-4 text-red-600" />}
+              className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200/50 py-2.5 text-xs shadow-none"
             >
-              {isPending ? <Loader2 className="w-4 h-4 animate-spin text-red-600" /> : <XCircle className="w-4 h-4" />}
-              <span>رفض الطلب</span>
-            </button>
+              رفض الطلب
+            </Button>
           </div>
         )}
       </div>
