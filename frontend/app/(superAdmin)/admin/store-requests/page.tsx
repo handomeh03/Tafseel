@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { UseGetStoreRequests } from "@/features/store/hooks/useGetAllStoreRequest";
 import Pagination from "@/components/Pagenation";
+import Table from "@/components/Table";
 import StoreRequestDetailsModal from "@/features/store/components/StoreRequestDetailsModal";
 
 
@@ -117,68 +118,43 @@ export default function StoreRequestsPage() {
 
       
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm relative">
-        {isLoading ? (
-          <div className="p-12 text-center text-gray-500 flex flex-col items-center justify-center gap-2">
-            <Loader2 className="w-8 h-8 animate-spin text-primary-accent" />
-            <p className="text-sm">جاري تحميل طلبات المتاجر...</p>
-          </div>
-        ) : isError ? (
-          <div className="p-12 text-center text-red-500 text-sm font-medium">
-            {error instanceof Error ? error.message : "حدث خطأ أثناء جلب البيانات"}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-right text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 font-semibold text-xs">
-                <tr>
-                  <th className="p-4">اسم المتجر</th>
-                  <th className="p-4">اسم المالك</th>
-                  <th className="p-4">رقم الهاتف</th>
-                  <th className="p-4">المدينة</th>
-                  <th className="p-4">تاريخ الطلب</th>
-                  <th className="p-4">الحالة</th>
-                  <th className="p-4 text-center">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {requests.length > 0 ? (
-                  requests.map((req) => (
-                    <tr key={req.id} className="hover:bg-gray-50/60 transition-colors">
-                      <td className="p-4 font-bold text-gray-900 flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-gray-400" />
-                        {req.storeName}
-                      </td>
-                      <td className="p-4 text-gray-700">{req.ownerName}</td>
-                      <td className="p-4 text-gray-600 dir-ltr text-right">{req.phone}</td>
-                      <td className="p-4 text-gray-600">{req.city || "غير محدد"}</td>
-                      <td className="p-4 text-gray-500 text-xs">
-                        {new Date(req.createdAt).toLocaleDateString("ar-EG")}
-                      </td>
-                      <td className="p-4">
-                        <StatusBadge status={req.status} />
-                      </td>
-                      <td className="p-4 text-center">
-                        <button
-                          onClick={() => setSelectedRequest(req)}
-                          className="p-2 text-gray-500 hover:text-primary-accent hover:bg-gray-100 rounded-lg transition-colors inline-flex items-center gap-1 text-xs font-medium"
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span>التفاصيل</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="p-8 text-center text-gray-400 text-sm">
-                      لا توجد طلبات متاجر مطابقة للبحث حالياً.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <Table
+          headers={["اسم المتجر", "اسم المالك", "رقم الهاتف", "المدينة", "تاريخ الطلب", "الحالة"]}
+          data={requests}
+          keyExtractor={(req) => req.id}
+          isLoading={isLoading}
+          loadingText="جاري تحميل طلبات المتاجر..."
+          isError={isError}
+          error={error}
+          emptyMessage="لا توجد طلبات متاجر مطابقة للبحث حالياً."
+          renderRow={(req) => (
+            <>
+              <td className="p-4 font-bold text-gray-900 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-gray-400" />
+                {req.storeName}
+              </td>
+              <td className="p-4 text-gray-700">{req.ownerName}</td>
+              <td className="p-4 text-gray-600 dir-ltr text-right">{req.phone}</td>
+              <td className="p-4 text-gray-600">{req.city || "غير محدد"}</td>
+              <td className="p-4 text-gray-500 text-xs">
+                {new Date(req.createdAt).toLocaleDateString("ar-EG")}
+              </td>
+              <td className="p-4">
+                <StatusBadge status={req.status} />
+              </td>
+            </>
+          )}
+        >
+          {(req) => (
+            <button
+              onClick={() => setSelectedRequest(req)}
+              className="p-2 text-gray-500 hover:text-primary-accent hover:bg-gray-100 rounded-lg transition-colors inline-flex items-center gap-1 text-xs font-medium"
+            >
+              <Eye className="w-4 h-4" />
+              <span>التفاصيل</span>
+            </button>
+          )}
+        </Table>
 
 
         {!isLoading && !isError && totalItems > 0 && (

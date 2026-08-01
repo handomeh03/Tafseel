@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import Pagination from "@/components/Pagenation";
+import Table from "@/components/Table";
 
 import { useGetOrders } from "@/features/order/hooks/useGetOrders";
 import { useEditOrderStatus } from "@/features/order/hooks/useEditOrderStatus";
@@ -202,169 +203,136 @@ export default function StoreOrdersPage() {
 
       {/* Table Container */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        {isLoading ? (
-          <div className="p-12 text-center text-gray-500 flex flex-col items-center justify-center gap-2">
-            <Loader2 className="w-8 h-8 animate-spin text-primary-accent" />
-            <p className="text-sm">جاري تحميل قائمة الطلبات...</p>
-          </div>
-        ) : isError ? (
-          <div className="p-12 text-center text-red-500 text-sm font-medium">
-            {error instanceof Error
-              ? error.message
-              : "حدث خطأ أثناء جلب الطلبات"}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-right text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 font-semibold text-xs">
-                <tr>
-                  <th className="p-4">رقم الطلب</th>
-                  <th className="p-4">تفاصيل الزبون</th>
-                  <th className="p-4">المنتج</th>
-                  <th className="p-4">المتجر</th>
-                  <th className="p-4">الإجمالي</th>
-                  <th className="p-4">حالة الطلب</th>
-                  <th className="p-4">التاريخ</th>
-                  <th className="p-4 text-center">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {orders.length > 0 ? (
-                  orders.map((order) => {
-                    const statusConfig =
-                      STATUS_CONFIG[order.status] || STATUS_CONFIG.PENDING;
-                    const productImage =
-                      order.product?.images && order.product.images.length > 0
-                        ? order.product.images[0]
-                        : null;
+        <Table
+          headers={["رقم الطلب", "تفاصيل الزبون", "المنتج", "المتجر", "الإجمالي", "حالة الطلب", "التاريخ"]}
+          data={orders}
+          keyExtractor={(order) => order.id}
+          isLoading={isLoading}
+          loadingText="جاري تحميل قائمة الطلبات..."
+          isError={isError}
+          error={error}
+          emptyMessage="لا توجد طلبات واردة مطابقة للبحث حالياً."
+          renderRow={(order) => {
+            const statusConfig =
+              STATUS_CONFIG[order.status] || STATUS_CONFIG.PENDING;
+            const productImage =
+              order.product?.images && order.product.images.length > 0
+                ? order.product.images[0]
+                : null;
 
-                    return (
-                      <tr
-                        key={order.id}
-                        className="hover:bg-gray-50/60 transition-colors"
-                      >
-                        <td className="p-4 font-black text-primary-accent whitespace-nowrap">
-                          {order.orderNumber}
-                        </td>
+            return (
+              <>
+                <td className="p-4 font-black text-primary-accent whitespace-nowrap">
+                  {order.orderNumber}
+                </td>
 
-                        <td className="p-4 space-y-0.5">
-                          <p className="font-bold text-gray-900">
-                            {order.customerName}
-                          </p>
-                          <div className="flex items-center gap-1 text-xs text-gray-400">
-                            <Phone className="w-3 h-3" />
-                            <span dir="ltr">{order.customerPhone}</span>
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-400">
-                            <MapPin className="w-3 h-3" />
-                            <span>
-                              {order.city} - {order.shippingAddress}
-                            </span>
-                          </div>
-                        </td>
+                <td className="p-4 space-y-0.5">
+                  <p className="font-bold text-gray-900">
+                    {order.customerName}
+                  </p>
+                  <div className="flex items-center gap-1 text-xs text-gray-400">
+                    <Phone className="w-3 h-3" />
+                    <span dir="ltr">{order.customerPhone}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-gray-400">
+                    <MapPin className="w-3 h-3" />
+                    <span>
+                      {order.city} - {order.shippingAddress}
+                    </span>
+                  </div>
+                </td>
 
-                        <td className="p-4">
-                          <div className="flex items-center gap-2">
-                            {productImage ? (
-                              <img
-                                src={productImage}
-                                alt={order.product?.title}
-                                className="w-8 h-8 rounded-lg object-cover border border-gray-200"
-                              />
-                            ) : (
-                              <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
-                                <Package className="w-4 h-4" />
-                              </div>
-                            )}
-                            <div>
-                              <p className="font-bold text-gray-800 line-clamp-1">
-                                {order.product?.title || "منتج غير معروف"}
-                              </p>
-                              <span className="text-xs text-gray-400">
-                                الكمية: {order.quantity}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
+                <td className="p-4">
+                  <div className="flex items-center gap-2">
+                    {productImage ? (
+                      <img
+                        src={productImage}
+                        alt={order.product?.title}
+                        className="w-8 h-8 rounded-lg object-cover border border-gray-200"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
+                        <Package className="w-4 h-4" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-bold text-gray-800 line-clamp-1">
+                        {order.product?.title || "منتج غير معروف"}
+                      </p>
+                      <span className="text-xs text-gray-400">
+                        الكمية: {order.quantity}
+                      </span>
+                    </div>
+                  </div>
+                </td>
 
-                        <td className="p-4 text-gray-700 font-medium whitespace-nowrap">
-                          {order.product?.store ? (
-                            <div className="flex items-center gap-1.5">
-                              <Building2 className="w-4 h-4 text-gray-400" />
-                              <span>{order.product.store.storeName}</span>
-                            </div>
-                          ) : (
-                            <span className="text-gray-400">متجري</span>
-                          )}
-                        </td>
+                <td className="p-4 text-gray-700 font-medium whitespace-nowrap">
+                  {order.product?.store ? (
+                    <div className="flex items-center gap-1.5">
+                      <Building2 className="w-4 h-4 text-gray-400" />
+                      <span>{order.product.store.storeName}</span>
+                    </div>
+                  ) : (
+                    <span className="text-gray-400">متجري</span>
+                  )}
+                </td>
 
-                        <td className="p-4 font-extrabold text-gray-900 whitespace-nowrap">
-                          {order.totalPrice} د.أ
-                        </td>
+                <td className="p-4 font-extrabold text-gray-900 whitespace-nowrap">
+                  {order.totalPrice} د.أ
+                </td>
 
-                        <td className="p-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${statusConfig.className}`}
-                          >
-                            {statusConfig.label}
-                          </span>
-                        </td>
+                <td className="p-4 whitespace-nowrap">
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${statusConfig.className}`}
+                  >
+                    {statusConfig.label}
+                  </span>
+                </td>
 
-                        <td className="p-4 text-gray-500 text-xs whitespace-nowrap">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                            {new Date(order.createdAt).toLocaleDateString(
-                              "ar-EG"
-                            )}
-                          </div>
-                        </td>
+                <td className="p-4 text-gray-500 text-xs whitespace-nowrap">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                    {new Date(order.createdAt).toLocaleDateString(
+                      "ar-EG"
+                    )}
+                  </div>
+                </td>
+              </>
+            );
+          }}
+        >
+          {(order) => (
+            <>
+              <button
+                ref={(el) => {
+                  buttonRefs.current[order.id] = el;
+                }}
+                onClick={() =>
+                  setActiveMenuId(
+                    activeMenuId === order.id ? null : order.id
+                  )
+                }
+                className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
 
-                        <td className="p-4 text-center whitespace-nowrap">
-                          <button
-                            ref={(el) => {
-                              buttonRefs.current[order.id] = el;
-                            }}
-                            onClick={() =>
-                              setActiveMenuId(
-                                activeMenuId === order.id ? null : order.id
-                              )
-                            }
-                            className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-
-                          <ActionsDropdownPortal
-                            buttonRef={buttonRefs.current[order.id]}
-                            isOpen={activeMenuId === order.id}
-                            onClose={() => setActiveMenuId(null)}
-                            onPreview={() => {
-                              setActiveMenuId(null);
-                              setSelectedOrder(order);
-                            }}
-                            onEditStatus={() => {
-                              setActiveMenuId(null);
-                              setOrderToEditStatus(order);
-                            }}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={8}
-                      className="p-8 text-center text-gray-400 text-sm"
-                    >
-                      لا توجد طلبات واردة مطابقة للبحث حالياً.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+              <ActionsDropdownPortal
+                buttonRef={buttonRefs.current[order.id]}
+                isOpen={activeMenuId === order.id}
+                onClose={() => setActiveMenuId(null)}
+                onPreview={() => {
+                  setActiveMenuId(null);
+                  setSelectedOrder(order);
+                }}
+                onEditStatus={() => {
+                  setActiveMenuId(null);
+                  setOrderToEditStatus(order);
+                }}
+              />
+            </>
+          )}
+        </Table>
 
         {!isLoading && !isError && (
           <Pagination

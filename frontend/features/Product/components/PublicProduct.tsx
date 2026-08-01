@@ -5,17 +5,20 @@ import {
   Search,
   SlidersHorizontal,
   Package,
-  Loader2,
   ChevronRight,
   ChevronLeft,
   Sparkles,
+  ArrowDownWideNarrow,
+  X,
 } from "lucide-react";
 
 import { useGetProducts } from "@/features/Product/hooks/useGetProduct";
 
+import Navbar from "@/features/landing/components/Navbar";
 import Pagination from "@/components/Pagenation";
 import ProductDetailsModal from "@/features/Product/components/ProductDetailsModal";
 import ProductCard, { Product } from "@/features/Product/components/ProductCard";
+import ProductCardSkeleton from "@/features/Product/components/ProductCardSkeleton";
 import { ProductCategory } from "@/features/Product/types/productCategory";
 import { useCreateOrder } from "@/features/order/hooks/useCreateOrder";
 import { CreateOrderFormValues } from "@/features/order/types/orderProductType";
@@ -29,6 +32,14 @@ const CATEGORY_LABELS: Record<ProductCategory, string> = {
   [ProductCategory.DECOR]: "ديكورات وإكسسوارات",
   [ProductCategory.OTHER]: "تصنيفات أخرى",
 };
+
+type SortOption = "newest" | "price_asc" | "price_desc";
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "newest", label: "الأحدث أولاً" },
+  { value: "price_asc", label: "السعر: من الأقل للأعلى" },
+  { value: "price_desc", label: "السعر: من الأعلى للأقل" },
+];
 
 const HERO_SLIDES = [
   {
@@ -60,13 +71,15 @@ const HERO_SLIDES = [
 export default function PublicProduct() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
+  const [sortOption, setSortOption] = useState<SortOption>("newest");
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(12);
 
   const [selectedProductForDetails, setSelectedProductForDetails] = useState<Product | null>(null);
   const [selectedProductForOrder, setSelectedProductForOrder] = useState<Product | null>(null);
 
-  
+
   const { createOrder, isPending: isSubmittingOrder } = useCreateOrder();
 
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -92,40 +105,58 @@ export default function PublicProduct() {
     "/product/public",
     currentPage,
     pageSize,
-    searchTerm
+    searchTerm,
+    selectedCategory,
+    sortOption
   );
 
   const products: Product[] = productsData?.data || [];
   const totalItems: number = productsData?.totalCount || 0;
   const totalPages: number = productsData?.totalPages || 1;
 
-  const filteredProducts = products.filter((product) => {
-    if (selectedCategory === "ALL") return true;
-    return product.category === selectedCategory;
-  });
+  const hasActiveFilters = selectedCategory !== "ALL" || searchTerm.trim() !== "";
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
   };
 
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (sort: SortOption) => {
+    setSortOption(sort);
+    setIsSortOpen(false);
+    setCurrentPage(1);
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory("ALL");
+    setCurrentPage(1);
+  };
+
   const closeDetailsModal = useCallback(() => setSelectedProductForDetails(null), []);
   const closeOrderModal = useCallback(() => setSelectedProductForOrder(null), []);
 
-  
+
   const handleOrderSubmit = async (formData: CreateOrderFormValues) => {
     try {
-      await createOrder(formData);
-      closeOrderModal();
+      const result = await createOrder(formData);
+      return result.orderNumber;
     } catch (err) {
-   
       console.error("Order submission failed:", err);
+      return undefined;
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50/60 pb-20" dir="rtl">
-      
+      <Navbar />
+
+      <main>
       <div
         className="relative w-full h-[320px] sm:h-[400px] lg:h-[460px] bg-gray-900 overflow-hidden group"
         onMouseEnter={() => setIsPaused(true)}
@@ -198,56 +229,116 @@ export default function PublicProduct() {
         </div>
       </div>
 
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-8 -mt-7 relative z-30">
-        <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-lg border border-subtle flex flex-col md:flex-row gap-3 justify-between items-center">
-          <div className="relative w-full md:w-96">
-            <Search className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="ابحث عن اسم المنتج أو الوصف..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-subtle bg-section-light/50 text-brand-dark text-xs focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all text-right"
-            />
+        <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-lg border border-subtle space-y-3">
+          <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
+            <div className="relative w-full md:w-96">
+              <Search className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="ابحث عن اسم المنتج أو الوصف..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-subtle bg-section-light/50 text-brand-dark text-xs focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all text-right"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <div className="flex items-center gap-1.5 overflow-x-auto flex-1 md:flex-none pb-1 md:pb-0 [scrollbar-width:none]">
+                <SlidersHorizontal className="w-4 h-4 text-gray-400 flex-shrink-0 ml-1 hidden md:block" />
+                <button
+                  onClick={() => handleCategoryChange("ALL")}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                    selectedCategory === "ALL"
+                      ? "bg-brand-primary text-white shadow-sm"
+                      : "bg-gray-100/80 text-gray-600 hover:bg-gray-200/60"
+                  }`}
+                >
+                  الكل
+                </button>
+
+                {Object.values(ProductCategory).map((catKey) => (
+                  <button
+                    key={catKey}
+                    onClick={() => handleCategoryChange(catKey)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                      selectedCategory === catKey
+                        ? "bg-brand-primary text-white shadow-sm"
+                        : "bg-gray-100/80 text-gray-600 hover:bg-gray-200/60"
+                    }`}
+                  >
+                    {CATEGORY_LABELS[catKey]}
+                  </button>
+                ))}
+              </div>
+
+              {/* Sort dropdown */}
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsSortOpen((prev) => !prev)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100/80 text-gray-600 hover:bg-gray-200/60 transition-all whitespace-nowrap"
+                >
+                  <ArrowDownWideNarrow className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">
+                    {SORT_OPTIONS.find((o) => o.value === sortOption)?.label}
+                  </span>
+                </button>
+
+                {isSortOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-30"
+                      onClick={() => setIsSortOpen(false)}
+                    />
+                    <div className="absolute left-0 top-full mt-2 z-40 w-48 bg-white rounded-2xl border border-gray-100 shadow-2xl py-1.5 text-xs">
+                      {SORT_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => handleSortChange(option.value)}
+                          className={`w-full text-right px-3.5 py-2 font-medium transition-colors ${
+                            sortOption === option.value
+                              ? "text-primary-accent bg-primary-accent/5"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 [scrollbar-width:none]">
-            <SlidersHorizontal className="w-4 h-4 text-gray-400 flex-shrink-0 ml-1 hidden md:block" />
-            <button
-              onClick={() => setSelectedCategory("ALL")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                selectedCategory === "ALL"
-                  ? "bg-brand-primary text-white shadow-sm"
-                  : "bg-gray-100/80 text-gray-600 hover:bg-gray-200/60"
-              }`}
-            >
-              الكل
-            </button>
+          {/* Results count + active filters */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <p className="text-[11px] text-gray-400 font-medium">
+              {isLoading ? "جاري البحث..." : `${totalItems} منتج متاح`}
+            </p>
 
-            {Object.values(ProductCategory).map((catKey) => (
+            {hasActiveFilters && (
               <button
-                key={catKey}
-                onClick={() => setSelectedCategory(catKey)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                  selectedCategory === catKey
-                    ? "bg-brand-primary text-white shadow-sm"
-                    : "bg-gray-100/80 text-gray-600 hover:bg-gray-200/60"
-                }`}
+                onClick={handleClearFilters}
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-primary-accent hover:underline"
               >
-                {CATEGORY_LABELS[catKey]}
+                <X className="w-3 h-3" />
+                مسح الفلاتر
               </button>
-            ))}
+            )}
           </div>
         </div>
       </div>
 
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-10 space-y-8">
         {isLoading ? (
-          <div className="p-16 text-center text-gray-500 flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-10 h-10 animate-spin text-primary-accent" />
-            <p className="text-sm font-medium">جاري تحميل معرض المنتجات...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: pageSize }).map((_, idx) => (
+              <ProductCardSkeleton key={idx} />
+            ))}
           </div>
         ) : isError ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-red-100 shadow-sm max-w-md mx-auto my-12 space-y-2">
@@ -255,10 +346,10 @@ export default function PublicProduct() {
               {error instanceof Error ? error.message : "حدث خطأ أثناء جلب المنتجات"}
             </p>
           </div>
-        ) : filteredProducts.length > 0 ? (
+        ) : products.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
+              {products.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -290,11 +381,21 @@ export default function PublicProduct() {
             <p className="text-xs text-gray-400">
               جرّب البحث بكلمات مختلفة أو تغيير التصنيف المحدد.
             </p>
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-accent/10 text-primary-accent text-xs font-bold hover:bg-primary-accent/20 transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+                مسح الفلاتر
+              </button>
+            )}
           </div>
         )}
       </div>
+      </main>
 
-      
+
       {selectedProductForDetails && (
         <ProductDetailsModal
           selectedProduct={selectedProductForDetails}
@@ -306,7 +407,7 @@ export default function PublicProduct() {
         />
       )}
 
-      
+
       {selectedProductForOrder && (
         <OrderProductModal
           product={selectedProductForOrder}
