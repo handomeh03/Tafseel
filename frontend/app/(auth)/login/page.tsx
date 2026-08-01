@@ -103,17 +103,7 @@ export default function LoginPage() {
 
           </form>
 
-          {/* Footer inside card */}
-          <div className="pt-4 border-t border-subtle/60 text-center space-y-3">
-            <p className="text-xs text-brand-muted">
-              ليس لديك حساب بعد؟{" "}
-              <Link href="#register" className="font-bold text-brand-primary hover:underline">
-                إنشاء حساب جديد
-              </Link>
-            </p>
-
-           
-          </div>
+         
 
         </div>
 
