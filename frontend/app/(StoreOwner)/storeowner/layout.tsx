@@ -74,7 +74,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
           <div className="space-y-8">
             
             <div className="flex items-center justify-between px-2">
-              <Link href="/store" className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-primary-accent text-white flex items-center justify-center font-bold shadow-sm">
                   <Sofa className="w-5 h-5" />
                 </div>
