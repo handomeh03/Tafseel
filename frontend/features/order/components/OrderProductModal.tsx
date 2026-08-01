@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -16,6 +17,9 @@ import {
   Minus,
   ShoppingBag,
   Truck,
+  Copy,
+  Check,
+  PackageSearch,
 } from "lucide-react";
 
 import { Button } from "@/components/Button";
@@ -54,7 +58,9 @@ interface OrderProductModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   onClose: () => void;
-  onSubmitOrder: (formData: CreateOrderFormValues) => Promise<void> | void;
+  onSubmitOrder: (
+    formData: CreateOrderFormValues
+  ) => Promise<string | undefined | void>;
 }
 
 export default function OrderProductModal({
@@ -66,6 +72,8 @@ export default function OrderProductModal({
 }: OrderProductModalProps) {
   const [mounted, setMounted] = useState(false);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
+  const [successOrderNumber, setSuccessOrderNumber] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
   const {
     register,
@@ -106,6 +114,7 @@ export default function OrderProductModal({
         productId: product.id,
       });
       setCurrentImgIndex(0);
+      setSuccessOrderNumber(null);
     }
     return () => {
       document.body.style.overflow = "unset";
@@ -113,6 +122,24 @@ export default function OrderProductModal({
   }, [isOpen, product, reset]);
 
   if (!isOpen || !product || !mounted) return null;
+
+  const handleValidSubmit = async (formData: CreateOrderFormValues) => {
+    const orderNumber = await onSubmitOrder(formData);
+    if (orderNumber) {
+      setSuccessOrderNumber(orderNumber);
+    }
+  };
+
+  const handleCopyOrderNumber = async () => {
+    if (!successOrderNumber) return;
+    try {
+      await navigator.clipboard.writeText(successOrderNumber);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 1500);
+    } catch {
+      // clipboard unavailable — silently ignore
+    }
+  };
 
   const productImages =
     product.images && product.images.length > 0
@@ -143,10 +170,12 @@ export default function OrderProductModal({
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black text-gray-900">
-                إتمام طلب شراء المنتج
+                {successOrderNumber ? "تم إرسال طلبك بنجاح" : "إتمام طلب شراء المنتج"}
               </h2>
               <p className="text-xs text-gray-500 mt-0.5">
-                أدخل تفاصيل التوصيل لنقوم بتأكيد طلبك وتجهيزه فوراً
+                {successOrderNumber
+                  ? "احتفظ برقم الطلب لمتابعة حالة الشحن لاحقاً"
+                  : "أدخل تفاصيل التوصيل لنقوم بتأكيد طلبك وتجهيزه فوراً"}
               </p>
             </div>
           </div>
@@ -161,10 +190,62 @@ export default function OrderProductModal({
           </button>
         </div>
 
-        {/* Body Container */}
+        {successOrderNumber ? (
+          /* Success State */
+          <div className="p-6 sm:p-10 flex flex-col items-center text-center gap-5">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="font-black text-lg text-gray-900">
+                شكراً لك، تم استلام طلبك!
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 max-w-sm">
+                سيتواصل معك المتجر قريباً لتأكيد التفاصيل. احتفظ برقم الطلب أدناه لتتمكن من تتبع حالته في أي وقت.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3">
+              <span className="font-black text-lg text-primary-accent dir-ltr">
+                {successOrderNumber}
+              </span>
+              <button
+                type="button"
+                onClick={handleCopyOrderNumber}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                aria-label="نسخ رقم الطلب"
+              >
+                {isCopied ? (
+                  <Check className="w-4 h-4 text-emerald-600" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto pt-1">
+              <Link
+                href="/myorder"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary-accent text-white text-xs font-bold hover:opacity-90 transition-all w-full sm:w-auto"
+              >
+                <PackageSearch className="w-4 h-4" />
+                تتبع طلبك الآن
+              </Link>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-xs font-bold hover:bg-gray-200 transition-all w-full sm:w-auto cursor-pointer"
+              >
+                متابعة التسوق
+              </button>
+            </div>
+          </div>
+        ) : (
+        /* Body Container */
         <div className="overflow-y-auto p-5 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-6">
-          
-          
+
+
           <div className="md:col-span-5 flex flex-col space-y-4 border-b md:border-b-0 md:border-l border-gray-100 pb-6 md:pb-0 md:pl-6">
             
             {/* Image Slider Box */}
@@ -285,7 +366,7 @@ export default function OrderProductModal({
           </div>
 
           
-          <form onSubmit={handleSubmit(onSubmitOrder)} className="md:col-span-7 flex flex-col justify-between space-y-4">
+          <form onSubmit={handleSubmit(handleValidSubmit)} className="md:col-span-7 flex flex-col justify-between space-y-4">
             <div className="space-y-3.5">
               
               {/* Customer Name using Custom Input */}
@@ -373,6 +454,7 @@ export default function OrderProductModal({
             </div>
           </form>
         </div>
+        )}
       </div>
     </div>,
     document.body

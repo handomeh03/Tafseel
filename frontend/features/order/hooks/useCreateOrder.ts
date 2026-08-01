@@ -9,7 +9,7 @@ import { CreateOrderFormValues } from "../types/orderProductType";
 
 export interface CreateOrderResponse {
   message: string;
-  data?: any;
+  orderNumber: string;
 }
 
 export function useCreateOrder() {
@@ -33,8 +33,12 @@ export function useCreateOrder() {
     },
 
     onSuccess: (data) => {
-      toast.success(data?.message || "تم إرسال طلبك بنجاح");
-      
+      toast.success(
+        data?.orderNumber
+          ? `تم إرسال طلبك بنجاح - رقم الطلب: ${data.orderNumber}`
+          : data?.message || "تم إرسال طلبك بنجاح"
+      );
+
       queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
 

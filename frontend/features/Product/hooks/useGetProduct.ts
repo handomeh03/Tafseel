@@ -10,7 +10,8 @@ export function useGetProducts(
   currentPage: number = 1,
   pageSize: number = 10,
   search?: string,
-  
+  category?: string,
+  sort?: string,
 ) {
   const [debouncedSearch] = useDebounce(search, 500);
 
@@ -22,21 +23,22 @@ export function useGetProducts(
     isFetching,
     refetch,
   } = useQuery({
-    
+
     queryKey: [
       "products",
       url,
-      { debouncedSearch, currentPage, pageSize },
+      { debouncedSearch, currentPage, pageSize, category, sort },
     ],
 
     queryFn: async () => {
       try {
-        const response = await api.get(url, { 
+        const response = await api.get(url, {
           params: {
             search: debouncedSearch || undefined,
             page: currentPage,
             limit: pageSize,
-            
+            category: category && category !== "ALL" ? category : undefined,
+            sort: sort || undefined,
           },
         });
 

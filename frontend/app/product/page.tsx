@@ -81,9 +81,7 @@ export default function CustomerProductsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       
-      <main>
-        <PublicProduct />
-      </main>
+      <PublicProduct />
     </>
   );
 }

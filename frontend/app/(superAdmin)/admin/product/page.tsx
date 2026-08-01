@@ -18,6 +18,7 @@ import {
 import { useGetProducts } from "@/features/Product/hooks/useGetProduct";
 
 import Pagination from "@/components/Pagenation";
+import Table from "@/components/Table";
 import ProductDetailsModal from "@/features/Product/components/ProductDetailsModal";
 import ConfirmDeleteModal from "@/features/Product/components/ConfirmDeleteModal";
 
@@ -213,163 +214,137 @@ export default function AdminProductsPage() {
 
       {/* 3️⃣ Products Table Container */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        {isLoading ? (
-          <div className="p-12 text-center text-gray-500 flex flex-col items-center justify-center gap-2">
-            <Loader2 className="w-8 h-8 animate-spin text-primary-accent" />
-            <p className="text-sm">جاري تحميل قائمة المنتجات...</p>
-          </div>
-        ) : isError ? (
-          <div className="p-12 text-center text-red-500 text-sm font-medium">
-            {error instanceof Error ? error.message : "حدث خطأ أثناء جلب المنتجات"}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-right text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 font-semibold text-xs">
-                <tr>
-                  <th className="p-4">المنتج</th>
-                  <th className="p-4">التصنيف</th> 
-                  <th className="p-4">المتجر</th>
-                  <th className="p-4">السعر</th>
-                  <th className="p-4">حالة التوفر</th>
-                  <th className="p-4">تاريخ الإضافة</th>
-                  <th className="p-4 text-center">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {products.length > 0 ? (
-                  products.map((product) => {
-                    const productImage =
-                      product.images && product.images.length > 0
-                        ? product.images[0]
-                        : product.image;
+        <Table
+          headers={["المنتج", "التصنيف", "المتجر", "السعر", "حالة التوفر", "تاريخ الإضافة"]}
+          data={products}
+          keyExtractor={(product) => product.id}
+          isLoading={isLoading}
+          loadingText="جاري تحميل قائمة المنتجات..."
+          isError={isError}
+          error={error}
+          emptyMessage="لا توجد منتجات مطابقة للبحث حالياً."
+          renderRow={(product) => {
+            const productImage =
+              product.images && product.images.length > 0
+                ? product.images[0]
+                : product.image;
 
-                    return (
-                      <tr key={product.id} className="hover:bg-gray-50/60 transition-colors">
-                        {/* Title & Image */}
-                        <td className="p-4 font-bold text-gray-900 flex items-center gap-3">
-                          {productImage ? (
-                            <img
-                              src={productImage}
-                              alt={product.title}
-                              className="w-10 h-10 rounded-xl object-cover border border-gray-200"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400">
-                              <Package className="w-5 h-5" />
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-bold text-gray-900">{product.title}</p>
-                            {product.description && (
-                              <p className="text-xs text-gray-400 font-normal truncate max-w-[220px]">
-                                {product.description}
-                              </p>
-                            )}
-                          </div>
-                        </td>
+            return (
+              <>
+                {/* Title & Image */}
+                <td className="p-4 font-bold text-gray-900 flex items-center gap-3">
+                  {productImage ? (
+                    <img
+                      src={productImage}
+                      alt={product.title}
+                      className="w-10 h-10 rounded-xl object-cover border border-gray-200"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400">
+                      <Package className="w-5 h-5" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-bold text-gray-900">{product.title}</p>
+                    {product.description && (
+                      <p className="text-xs text-gray-400 font-normal truncate max-w-[220px]">
+                        {product.description}
+                      </p>
+                    )}
+                  </div>
+                </td>
 
-                        
-                        <td className="p-4">
-                          {product.category ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary-accent/10 text-primary-accent text-xs font-bold">
-                              <Layers className="w-3 h-3" />
-                              <span>{CATEGORY_LABELS[product.category]}</span>
-                            </span>
-                          ) : (
-                            <span className="text-gray-400 text-xs">غير محدد</span>
-                          )}
-                        </td>
+                <td className="p-4">
+                  {product.category ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary-accent/10 text-primary-accent text-xs font-bold">
+                      <Layers className="w-3 h-3" />
+                      <span>{CATEGORY_LABELS[product.category]}</span>
+                    </span>
+                  ) : (
+                    <span className="text-gray-400 text-xs">غير محدد</span>
+                  )}
+                </td>
 
-                        {/* Store Name */}
-                        <td className="p-4 text-gray-700 font-medium">
-                          {product.store ? (
-                            <div className="flex items-center gap-2">
-                              {product.store.logo ? (
-                                <img
-                                  src={product.store.logo}
-                                  alt={product.store.storeName}
-                                  className="w-6 h-6 rounded-lg object-cover"
-                                />
-                              ) : (
-                                <Building2 className="w-4 h-4 text-gray-400" />
-                              )}
-                              <span>{product.store.storeName}</span>
-                            </div>
-                          ) : (
-                            <span className="text-gray-400">غير مرتبط</span>
-                          )}
-                        </td>
+                {/* Store Name */}
+                <td className="p-4 text-gray-700 font-medium">
+                  {product.store ? (
+                    <div className="flex items-center gap-2">
+                      {product.store.logo ? (
+                        <img
+                          src={product.store.logo}
+                          alt={product.store.storeName}
+                          className="w-6 h-6 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <Building2 className="w-4 h-4 text-gray-400" />
+                      )}
+                      <span>{product.store.storeName}</span>
+                    </div>
+                  ) : (
+                    <span className="text-gray-400">غير مرتبط</span>
+                  )}
+                </td>
 
-                        {/* Price */}
-                        <td className="p-4 font-extrabold text-primary-accent dir-ltr text-right">
-                          {product.price ? `${product.price} د.أ` : "غير محدد"}
-                        </td>
+                {/* Price */}
+                <td className="p-4 font-extrabold text-primary-accent dir-ltr text-right">
+                  {product.price ? `${product.price} د.أ` : "غير محدد"}
+                </td>
 
-                        {/* Availability Status */}
-                        <td className="p-4">
-                          {product.isAvailable ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                              متوفر
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                              <XCircle className="w-3.5 h-3.5 text-rose-600" />
-                              غير متوفر
-                            </span>
-                          )}
-                        </td>
+                {/* Availability Status */}
+                <td className="p-4">
+                  {product.isAvailable ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      متوفر
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                      <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                      غير متوفر
+                    </span>
+                  )}
+                </td>
 
-                        {/* Created At */}
-                        <td className="p-4 text-gray-500 text-xs">
-                          {new Date(product.createdAt).toLocaleDateString("ar-EG")}
-                        </td>
+                {/* Created At */}
+                <td className="p-4 text-gray-500 text-xs">
+                  {new Date(product.createdAt).toLocaleDateString("ar-EG")}
+                </td>
+              </>
+            );
+          }}
+        >
+          {(product) => (
+            <>
+              <button
+                ref={(el) => {
+                  buttonRefs.current[product.id] = el;
+                }}
+                onClick={() =>
+                  setActiveMenuId(activeMenuId === product.id ? null : product.id)
+                }
+                className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
 
-                        {/* Actions Button */}
-                        <td className="p-4 text-center">
-                          <button
-                            ref={(el) => {
-                              buttonRefs.current[product.id] = el;
-                            }}
-                            onClick={() =>
-                              setActiveMenuId(activeMenuId === product.id ? null : product.id)
-                            }
-                            className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-
-                          {/* Actions Portal Menu */}
-                          <ActionsDropdownPortal
-                            buttonRef={buttonRefs.current[product.id]}
-                            isOpen={activeMenuId === product.id}
-                            onClose={() => setActiveMenuId(null)}
-                            onPreview={() => {
-                              setSelectedProduct(product);
-                              setActiveMenuId(null);
-                            }}
-                            onEdit={() => handleEdit(product)}
-                            onDelete={() => {
-                              setProductToDelete(product);
-                              setActiveMenuId(null);
-                            }}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="p-8 text-center text-gray-400 text-sm">
-                      لا توجد منتجات مطابقة للبحث حالياً.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+              {/* Actions Portal Menu */}
+              <ActionsDropdownPortal
+                buttonRef={buttonRefs.current[product.id]}
+                isOpen={activeMenuId === product.id}
+                onClose={() => setActiveMenuId(null)}
+                onPreview={() => {
+                  setSelectedProduct(product);
+                  setActiveMenuId(null);
+                }}
+                onEdit={() => handleEdit(product)}
+                onDelete={() => {
+                  setProductToDelete(product);
+                  setActiveMenuId(null);
+                }}
+              />
+            </>
+          )}
+        </Table>
 
         {/* 📄 Pagination */}
         {!isLoading && !isError && (
