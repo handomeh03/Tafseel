@@ -19,6 +19,12 @@ export class OrderController {
     return await this.orderService.createOrder(createOrderDto);
   }
 
+  @IsPublic()
+  @Get("track/:orderNumber")
+  async trackOrder(@Param('orderNumber') orderNumber: string) {
+    return await this.orderService.trackOrder(orderNumber);
+  }
+
   @Roles(Role.STORE_OWNER,Role.SUPER_ADMIN)
   @UseGuards(RolesGuard)
   @Get("get-orders")
@@ -27,6 +33,16 @@ export class OrderController {
     const userId = user.sub;
 
     return await this.orderService.getOrders(userId, dto);
+  }
+
+  @Roles(Role.STORE_OWNER,Role.SUPER_ADMIN)
+  @UseGuards(RolesGuard)
+  @Get("order-stats")
+  async getOrderStats(@Req() req: Request) {
+    const user = req['user'];
+    const userId = user.sub;
+
+    return await this.orderService.getOrderStats(userId);
   }
 
   @Roles(Role.STORE_OWNER,Role.SUPER_ADMIN)

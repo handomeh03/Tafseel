@@ -42,5 +42,11 @@ export class StoreController {
     return await this.storeService.getallActiveStore(GetAllActiveStore);
   }
 
+  @Roles(Role.SUPER_ADMIN)
+  @UseGuards(RolesGuard)
+  @Get("store-stats")
+  async getStoreStats() {
+    return await this.storeService.getStoreStats();
+  }
 
 }

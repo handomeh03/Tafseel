@@ -315,4 +315,35 @@ export class StoreService {
       throw new InternalServerErrorException('حدث خطأ أثناء جلب قائمة المتاجر');
     }
   }
+
+  async getStoreStats() {
+    try {
+      const [totalStores, totalProducts, requestGroups] = await this.database.$transaction([
+        this.database.store.count(),
+        this.database.product.count(),
+        this.database.storeRequest.groupBy({
+          by: ['status'],
+          orderBy: { status: 'asc' },
+          _count: true,
+        }),
+      ]);
+
+      const requestCounts = Object.fromEntries(
+        Object.values(RequestStatus).map((status) => [status, 0]),
+      ) as Record<RequestStatus, number>;
+
+      for (const group of requestGroups) {
+        requestCounts[group.status] = group._count as unknown as number;
+      }
+
+      return {
+        totalStores,
+        totalProducts,
+        totalRequests: requestCounts.PENDING + requestCounts.APPROVED + requestCounts.REJECTED,
+        requestCounts,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('حدث خطأ أثناء جلب إحصائيات المتاجر');
+    }
+  }
 }

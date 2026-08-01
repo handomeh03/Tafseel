@@ -1,6 +1,8 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsInt, IsOptional, IsString, Min } from "class-validator";
-import { ProductCategory } from "@prisma/client"; 
+import { IsEnum, IsIn, IsInt, IsOptional, IsString, Min } from "class-validator";
+import { ProductCategory } from "@prisma/client";
+
+export type ProductSortOption = "newest" | "price_asc" | "price_desc";
 
 export class getProductDto {
   @IsOptional()
@@ -22,4 +24,8 @@ export class getProductDto {
   @IsOptional()
   @IsEnum(ProductCategory, { message: "تصنيف المنتج غير صالح" })
   category?: ProductCategory;
+
+  @IsOptional()
+  @IsIn(["newest", "price_asc", "price_desc"], { message: "طريقة الترتيب غير صالحة" })
+  sort?: ProductSortOption;
 }
