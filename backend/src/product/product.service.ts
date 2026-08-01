@@ -46,7 +46,7 @@ export class ProductService {
 
   async getPublicProduct(queryDto: getProductDto) {
     try {
-      const { page = 1, limit = 10, search,category } = queryDto;
+      const { page = 1, limit = 10, search, category, sort } = queryDto;
       const skip = (page - 1) * limit;
 
 
@@ -71,12 +71,20 @@ export class ProductService {
           }
         ];
       }
+
+      const orderBy: Prisma.ProductOrderByWithRelationInput =
+        sort === 'price_asc'
+          ? { price: 'asc' }
+          : sort === 'price_desc'
+            ? { price: 'desc' }
+            : { createdAt: 'desc' };
+
       const [products, totalCount] = await Promise.all([
         this.database.product.findMany({
           where,
           skip,
           take: limit,
-          orderBy: { createdAt: 'desc' },
+          orderBy,
           include: {
             store: {
               select: {
@@ -307,6 +315,63 @@ async getAdminProduct(queryDto: getProductDto) {
     throw new InternalServerErrorException('فشل في تحديث المنتج');
   }
 }
+
+  async getProductStats(userId: number) {
+    try {
+      const user = await this.database.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
+      });
+
+      if (!user) {
+        throw new NotFoundException('المستخدم غير موجود');
+      }
+
+      let where: Prisma.ProductWhereInput = {};
+
+      if (user.role === 'STORE_OWNER') {
+        const store = await this.database.store.findUnique({
+          where: { ownerId: userId },
+          select: { id: true },
+        });
+
+        if (!store) {
+          throw new NotFoundException('لم يتم العثور على المتجر لهذا المستخدم');
+        }
+
+        where = { storeId: store.id };
+      }
+
+      const [totalProducts, availableProducts, categoryGroups] =
+        await this.database.$transaction([
+          this.database.product.count({ where }),
+          this.database.product.count({ where: { ...where, isAvailable: true } }),
+          this.database.product.groupBy({
+            by: ['category'],
+            where,
+            orderBy: { category: 'asc' },
+            _count: true,
+          }),
+        ]);
+
+      const categoryCounts = Object.fromEntries(
+        categoryGroups.map((group) => [group.category, group._count]),
+      );
+
+      return {
+        totalProducts,
+        availableProducts,
+        unavailableProducts: totalProducts - availableProducts,
+        categoryCounts,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('فشل في جلب إحصائيات المنتجات');
+    }
+  }
 
   async deleteProduct(userId: number, productId: number) {
   try {

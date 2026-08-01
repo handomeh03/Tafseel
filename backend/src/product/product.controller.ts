@@ -51,6 +51,15 @@ export class ProductController {
 
   @Roles(Role.STORE_OWNER,Role.SUPER_ADMIN)
   @UseGuards(RolesGuard)
+  @Get("product-stats")
+  async getProductStats(@Req() req: Request) {
+    const user = req['user'];
+    const userId = user.sub;
+    return await this.productService.getProductStats(userId);
+  }
+
+  @Roles(Role.STORE_OWNER,Role.SUPER_ADMIN)
+  @UseGuards(RolesGuard)
   @Patch("edit-product/:id")
   async editProduct(@Body() UpdateProductDto: UpdateProductDto, @Param('id', ParseIntPipe) id: number, @Req() req: Request) {
     const user = req['user'];

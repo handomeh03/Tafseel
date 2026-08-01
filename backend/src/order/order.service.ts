@@ -51,7 +51,44 @@ async createOrder(createOrderDto: CreateOrderDto) {
     
   });
 
-  return {message: 'تم إنشاء الطلب بنجاح'};
+  return { message: 'تم إنشاء الطلب بنجاح', orderNumber };
+}
+
+// public - anyone with the order number can track their order
+async trackOrder(orderNumber: string) {
+  const order = await this.database.order.findUnique({
+    where: { orderNumber: orderNumber.trim() },
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      customerName: true,
+      city: true,
+      shippingAddress: true,
+      quantity: true,
+      unitPrice: true,
+      deliveryPrice: true,
+      totalPrice: true,
+      createdAt: true,
+      updatedAt: true,
+      product: {
+        select: {
+          id: true,
+          title: true,
+          images: true,
+          store: {
+            select: { id: true, storeName: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    throw new NotFoundException('لم يتم العثور على طلب بهذا الرقم، يرجى التأكد من رقم الطلب');
+  }
+
+  return order;
 }
 
 // for superadmin and storeowner
@@ -219,6 +256,87 @@ async getOrders(userId: number, dto: getOrdersDto) {
   }
 }
 
+  // for superadmin and storeowner
+  async getOrderStats(userId: number) {
+    try {
+      const user = await this.database.user.findUnique({
+        where: { id: userId },
+        select: { id: true, role: true },
+      });
 
-  
+      if (!user) {
+        throw new NotFoundException('المستخدم غير موجود');
+      }
+
+      let where: Prisma.OrderWhereInput = {};
+
+      if (user.role === Role.STORE_OWNER) {
+        const store = await this.database.store.findFirst({
+          where: { ownerId: user.id },
+          select: { id: true },
+        });
+
+        if (!store) {
+          throw new NotFoundException('لم يتم العثور على متجر مرتبط بهذا الحساب');
+        }
+
+        where = { product: { storeId: store.id } };
+      } else if (user.role !== Role.SUPER_ADMIN) {
+        throw new ForbiddenException('ليس لديك صلاحية للوصول إلى إحصائيات الطلبات');
+      }
+
+      const [totalOrders, statusGroups, revenueAgg, recentOrders] =
+        await this.database.$transaction([
+          this.database.order.count({ where }),
+          this.database.order.groupBy({
+            by: ['status'],
+            where,
+            orderBy: { status: 'asc' },
+            _count: true,
+          }),
+          this.database.order.aggregate({
+            where: { ...where, status: OrderStatus.DELIVERED },
+            _sum: { totalPrice: true },
+          }),
+          this.database.order.findMany({
+            where,
+            take: 5,
+            orderBy: { createdAt: 'desc' },
+            select: {
+              id: true,
+              orderNumber: true,
+              status: true,
+              customerName: true,
+              totalPrice: true,
+              createdAt: true,
+              product: {
+                select: { id: true, title: true },
+              },
+            },
+          }),
+        ]);
+
+      const statusCounts = Object.fromEntries(
+        Object.values(OrderStatus).map((status) => [status, 0]),
+      ) as Record<OrderStatus, number>;
+
+      for (const group of statusGroups) {
+        statusCounts[group.status] = group._count as unknown as number;
+      }
+
+      return {
+        totalOrders,
+        totalRevenue: revenueAgg._sum.totalPrice ?? 0,
+        statusCounts,
+        recentOrders,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('فشل في جلب إحصائيات الطلبات');
+    }
+  }
+
 }
