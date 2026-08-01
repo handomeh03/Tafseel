@@ -29,7 +29,7 @@ async function bootstrap() {
     });
 
     await app.listen(port);
-    logger.log(`Application is running on: http://localhost:${port}`);
+    logger.log(`Application is running `);
   } catch (error) {
     logger.error('Failed to start application:', error);
     process.exit(1);
