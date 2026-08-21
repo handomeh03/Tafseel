@@ -11,13 +11,23 @@ import { ProductModule } from './product/product.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/Guards/AuthGuard';
 import { OrderModule } from './order/order.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { AppThrottlerGuard } from './auth/Guards/AppThrottlerGuard';
 
 @Module({
   imports: [DatabaseModule, ConfigModule.forRoot({
     isGlobal: true,
-  }), AuthModule, SecurityModule, StoreModule, EmailerModule, ProductModule, OrderModule,],
+  }), ThrottlerModule.forRoot([{
+    name: 'global',
+    ttl: 60000,
+    limit: 200,
+    
+  }]), AuthModule, SecurityModule, StoreModule, EmailerModule, ProductModule, OrderModule,],
   controllers: [AppController],
   providers: [AppService, {
+    provide: APP_GUARD,
+    useClass: AppThrottlerGuard,
+  }, {
     provide: APP_GUARD,
     useClass: AuthGuard,
   },],
