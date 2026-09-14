@@ -1,524 +1,539 @@
-# 🛋️ Tafseel — تفصيل
-
-### A Full-Stack Multi-Tenant SaaS Platform for Custom Furniture & Upholstery
-
 <div align="center">
 
-**Tafseel** is a production-grade multi-tenant SaaS platform designed for furniture showrooms, manufacturers, and custom upholstery workshops.
+# Tafseel — تفصيل 🛋️
 
-It digitizes the entire furniture commerce and management lifecycle — from storefront creation and product management to customer orders, tracking, and business analytics.
+**A Full-Stack Multi-Tenant SaaS Platform for Custom Furniture & Upholstery**
 
-**[🌐 Live Demo](https://tafseel-frontend.onrender.com)**
+[Live Demo](https://tafseel-frontend.onrender.com)
 
 </div>
 
 ---
 
-## 📋 Table of Contents
-
-* [Project Overview](#-project-overview)
-* [Problem Statement](#-problem-statement)
-* [Key Features](#-key-features)
-* [User Roles](#-user-roles)
-* [Tech Stack](#-tech-stack)
-* [Architecture](#-architecture)
-* [Project Structure](#-project-structure)
-* [Getting Started](#-getting-started)
-* [Environment Variables](#-environment-variables)
-* [Running the Application](#-running-the-application)
-* [Live Demo](#-live-demo)
-* [Future Improvements](#-future-improvements)
-* [Author](#-author)
-
----
-
 ## 🛋️ Project Overview
 
-**Tafseel** is a multi-tenant SaaS platform built specifically for the **custom furniture and upholstery industry**.
+**Tafseel** is a full-stack multi-tenant SaaS platform designed for the furniture and custom upholstery industry. It connects furniture store owners with customers through digital storefronts while providing dedicated dashboards for managing stores, products, orders, and business statistics.
 
-The platform connects furniture businesses with customers through dedicated digital storefronts while providing store owners with powerful tools to manage their products, orders, and business performance.
+The platform digitizes the furniture commerce and management lifecycle, allowing store owners to manage their products and incoming orders while customers can browse products, place orders, and track their order status.
 
-Instead of relying on traditional social media pages or manual order management, furniture businesses can create their own digital presence and manage their operations through a centralized platform.
+### Key Capabilities:
 
-### 🎯 Main Objectives
+* **For Store Owners:**
+  * Manage their digital storefront.
+  * Add, edit, and delete products.
+  * Manage their product catalog.
+  * Receive and manage customer orders.
+  * Update order statuses.
+  * View revenue statistics.
+  * View order statistics.
+  * Change their account password.
 
-* Digitize traditional furniture and upholstery businesses.
-* Provide each store with its own digital storefront.
-* Simplify furniture product management.
-* Allow customers to browse and purchase products online.
-* Provide customers with order tracking.
-* Give store owners visibility into orders and revenue.
-* Provide administrators with centralized platform management.
-* Build a scalable **multi-tenant SaaS architecture**.
+* **For Customers:**
+  * Browse furniture products.
+  * Explore products from different stores.
+  * View product details.
+  * Place purchase orders.
+  * Receive an order tracking ID.
+  * Track order status.
+
+* **For Administrators:**
+  * Review store registration requests.
+  * Approve or reject store registration requests.
+  * Send email notifications to store owners after approval or rejection.
+  * View and manage active stores.
+  * View all products across the platform.
+  * View and manage all orders across the platform.
 
 ---
 
 ## ❗ Problem Statement
 
-Many local furniture stores and upholstery workshops still depend heavily on:
+Many local furniture stores and upholstery workshops rely on social media, phone calls, and messaging applications to showcase products and manage customer orders.
 
-* Social media platforms for showcasing products.
-* Phone calls and messaging applications for receiving orders.
-* Manual order tracking.
-* Spreadsheets or paper-based business records.
-* Limited visibility into business performance.
-
-This creates several challenges:
+This can create several challenges:
 
 * Difficult product management.
-* Orders can be lost or misunderstood.
-* Customers have limited visibility into their order status.
-* Store owners lack centralized business analytics.
-* Each business needs to build and maintain its own digital presence.
+* Manual order management.
+* Difficulty tracking customer orders.
+* Lack of centralized business information.
+* Limited visibility into store performance.
+* No dedicated digital storefront for the business.
 
-### 💡 The Solution
+### 💡 Solution
 
-**Tafseel** provides a centralized SaaS platform where multiple furniture businesses can operate independently while sharing the same underlying system.
+**Tafseel** provides a centralized digital platform where furniture businesses can create and manage their stores, products, and orders.
 
-Each store can manage its own:
-
-* Digital storefront
-* Products
-* Orders
-* Customers
-* Revenue
-* Business data
-
-while the platform administrator maintains system-wide control and monitoring.
+Customers can browse furniture products, place orders, and track their orders, while administrators can manage the overall platform and control store requests, products, and orders.
 
 ---
 
-# 🚀 Key Features
+## 👥 User Roles
 
-## 🏪 Store Owner
+Tafseel uses **Role-Based Access Control (RBAC)** with three main roles:
 
-Store owners have access to a dedicated dashboard where they can:
+### 🛡️ SUPER_ADMIN
 
-* Create and manage their store.
-* Customize their digital storefront.
-* Add, edit, and remove products.
-* Upload product images.
-* Organize furniture products.
-* Manage incoming orders.
-* Track order statuses.
-* Monitor revenue and business performance.
-* Manage their store information.
+The administrator can:
 
----
+* Manage store registration requests.
+* Approve or reject stores.
+* Send approval/rejection emails.
+* View active stores.
+* Manage stores.
+* View all products.
+* Manage products.
+* View all orders.
+* Manage orders.
 
-## 👤 Customers
+### 🏪 STORE_OWNER
+
+The store owner can:
+
+* Manage their store.
+* Add products.
+* Edit products.
+* Delete products.
+* Receive customer orders.
+* Update order statuses.
+* View revenue statistics.
+* View order statistics.
+* Change account password.
+
+### 👤 CUSTOMER
 
 Customers can:
 
-* Browse furniture products.
+* Browse products.
 * Explore different stores.
 * View product details.
-* Place purchase orders.
+* Place orders.
 * Receive an order tracking ID.
-* Track their order progress.
-* View order status updates.
+* Track their orders.
 
-### 📦 Order Tracking
+---
 
-Customers can track their orders using a unique **Order Tracking ID** without requiring access to the store owner's dashboard.
+## 🚀 Key Features
+
+### 📝 Store Registration Requests
+
+Furniture store owners can submit a request to join the platform.
+
+The administrator can then:
+
+1. Review the store request.
+2. Approve or reject the request.
+3. Automatically notify the store owner by email.
+
+```text
+Store Owner
+     │
+     ▼
+Store Registration Request
+     │
+     ▼
+Admin Review
+     │
+ ┌───┴────┐
+ ▼        ▼
+Accept   Reject
+ │        │
+ ▼        ▼
+Email    Email
+🏪 Store Management
+
+Administrators can access all active stores through the admin dashboard.
+
+Store owners have their own dedicated store management environment where they can manage their products and incoming orders.
+
+📦 Product Management
+Store Owner
+
+Store owners can:
+
+Add products.
+Edit products.
+Delete products.
+Manage their own product catalog.
+Admin
+
+Administrators can:
+
+View all products across the platform.
+Manage products across different stores.
+🛒 Order Management
+Store Owner
+
+Store owners can:
+
+Receive incoming orders.
+View customer orders.
+Update order statuses.
+Manage the order lifecycle.
+Admin
+
+Administrators can:
+
+View all orders.
+Monitor orders across all stores.
+Manage order statuses and information.
+📊 Business Statistics
+
+Store owners can monitor their business performance through statistics such as:
+
+Revenue.
+Number of orders.
+Order performance.
+📦 Order Tracking
+
+Customers can track their orders using a unique order tracking ID.
 
 Example:
 
-```text
 Order ID: TAF-2026-00125
 
 Status:
-Order Received → Processing → Manufacturing → Ready → Delivered
-```
+Pending → Confirmed → Processing → Completed
+📧 Email Notifications
 
----
+The backend includes an email service that notifies store owners when an administrator makes a decision about their store registration request.
 
-## 🛡️ Admin Dashboard
+Possible notifications include:
 
-The platform administrator has system-wide visibility and management capabilities.
+Store request approved.
+Store request rejected.
+💻 Tech Stack
+Frontend
+Language: TypeScript
+Framework: Next.js
+Library: React
+Styling: Tailwind CSS
+Routing: Next.js App Router
+Architecture: Feature-Based Architecture
+Backend
+Runtime: Node.js
+Framework: NestJS
+Language: TypeScript
+ORM: Prisma ORM
+Database: PostgreSQL
+Infrastructure
+Database Hosting: Neon PostgreSQL
+Application Hosting: Render
+Authentication & Security
+Access Token & Refresh Token authentication.
+Role-Based Access Control (RBAC).
+Protected resources.
+Password management.
+Environment-based configuration.
+Email
+Email service for store approval/rejection notifications.
+🏗️ Architecture
 
-The Admin Dashboard provides:
+Tafseel follows a modern full-stack architecture:
 
-* Platform overview.
-* Store management.
-* User management.
-* System-wide statistics.
-* Business performance analytics.
-* Monitoring of platform activity.
-* Centralized administrative control.
-
----
-
-# 👥 User Roles
-
-Tafseel follows a **Role-Based Access Control (RBAC)** approach.
-
-| Role          | Description                                  |
-| ------------- | -------------------------------------------- |
-| `SUPER_ADMIN` | Manages and monitors the entire platform     |
-| `STORE_OWNER` | Manages a furniture store and its operations |
-| `CUSTOMER`    | Browses products and places/tracks orders    |
-
-Each role has access only to the resources and operations permitted for that role.
-
----
-
-# 💻 Tech Stack
-
-## Frontend
-
-| Technology                     | Purpose                        |
-| ------------------------------ | ------------------------------ |
-| **TypeScript**                 | Type-safe development          |
-| **Next.js**                    | React framework                |
-| **React**                      | UI development                 |
-| **Tailwind CSS**               | Styling                        |
-| **App Router**                 | Application routing            |
-| **Feature-Based Architecture** | Scalable frontend organization |
-
----
-
-## Backend
-
-| Technology     | Purpose                       |
-| -------------- | ----------------------------- |
-| **Node.js**    | Runtime environment           |
-| **NestJS**     | Backend framework             |
-| **TypeScript** | Type-safe backend development |
-| **Prisma ORM** | Database access and ORM       |
-| **PostgreSQL** | Relational database           |
-
----
-
-# 🏗️ Architecture
-
-The application follows a modern **Full-Stack Architecture**:
-
-```text
                     ┌──────────────────────┐
                     │      Customers       │
                     └──────────┬───────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────┐
-│                   Next.js Frontend                   │
+│                  Next.js Frontend                   │
 │                                                     │
-│  Storefronts │ Customer UI │ Owner Dashboard │ Admin│
+│ Storefront │ Customer │ Store Owner │ Admin        │
+│ Dashboard  │ Dashboard│ Dashboard   │ Dashboard    │
 └───────────────────────┬─────────────────────────────┘
                         │
                         │ REST API
                         ▼
 ┌─────────────────────────────────────────────────────┐
-│                    NestJS Backend                    │
+│                   NestJS Backend                    │
 │                                                     │
-│ Authentication │ Authorization │ Orders │ Products  │
-│ Users │ Stores │ Analytics │ Business Logic        │
-└───────────────────────┬─────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│                   Prisma ORM                         │
+│ Auth │ Store │ Product │ Order │ Security │ Email  │
+│ Database │ Utilities                              │
 └───────────────────────┬─────────────────────────────┘
                         │
                         ▼
                  ┌───────────────┐
+                 │   Prisma ORM  │
+                 └───────┬───────┘
+                         │
+                         ▼
+                 ┌───────────────┐
                  │  PostgreSQL   │
+                 │     Neon      │
                  └───────────────┘
-```
+🧩 Multi-Tenant Architecture
 
----
+Tafseel is designed as a multi-tenant SaaS platform, allowing multiple furniture stores to operate within the same application.
 
-# 🧩 Multi-Tenant Architecture
+Each store owner manages their own store, products, and orders while the administrator maintains centralized control over the entire platform.
 
-Tafseel is designed as a **multi-tenant SaaS platform**.
-
-The same application infrastructure can support multiple furniture businesses while keeping each store's data logically isolated.
-
-Conceptually:
-
-```text
                     Tafseel Platform
                            │
-        ┌──────────────────┼──────────────────┐
-        │                  │                  │
-        ▼                  ▼                  ▼
-     Store A            Store B            Store C
-        │                  │                  │
-     Products           Products           Products
-     Orders             Orders             Orders
-     Customers           Customers          Customers
-     Revenue             Revenue            Revenue
-```
+          ┌────────────────┼────────────────┐
+          │                │                │
+          ▼                ▼                ▼
+       Store A          Store B          Store C
+          │                │                │
+      Products         Products         Products
+      Orders           Orders           Orders
+      Statistics       Statistics       Statistics
 
-This architecture allows the platform to scale by onboarding additional stores without creating a separate application for every business.
+This architecture allows the platform to scale by adding more furniture businesses without creating a separate application for each store.
 
----
-
-# 📁 Project Structure
-
-A simplified project structure:
-
-```text
-tafseel/
+📁 Project Structure
+Backend
+backend/
 │
-├── backend/
-│   ├── src/
-│   │   ├── auth/
-│   │   ├── users/
-│   │   ├── stores/
-│   │   ├── products/
-│   │   ├── orders/
-│   │   ├── admin/
-│   │   └── ...
+├── dist/
+│
+├── prisma/
+│
+├── src/
+│   ├── auth/
+│   ├── database/
+│   ├── emailer/
+│   ├── order/
+│   ├── product/
+│   ├── security/
+│   ├── store/
+│   ├── utils/
 │   │
-│   ├── prisma/
-│   │   └── schema.prisma
-│   │
-│   ├── .env
-│   └── package.json
+│   ├── app.controller.spec.ts
+│   ├── app.controller.ts
+│   ├── app.module.ts
+│   ├── app.service.ts
+│   └── main.ts
 │
-├── frontend/
-│   ├── app/
-│   ├── components/
-│   ├── features/
-│   ├── hooks/
-│   ├── lib/
-│   ├── services/
-│   ├── public/
-│   └── package.json
+├── test/
 │
-└── README.md
-```
+├── .env
+├── .gitignore
+├── nest-cli.json
+├── package-lock.json
+├── package.json
+├── prisma.config.ts
+├── tsconfig.build.json
+└── tsconfig.json
+Frontend
 
----
+The frontend is built using:
 
-# ⚙️ Getting Started
+Next.js
+React
+TypeScript
+Tailwind CSS
+Feature-Based Architecture
+🚀 Getting Started
 
-Follow these steps to run Tafseel locally.
+To get a local copy of Tafseel up and running, follow these steps.
 
-## Prerequisites
+Prerequisites
 
 Make sure you have the following installed:
 
-* [Node.js](https://nodejs.org/)
-* npm or pnpm
-* PostgreSQL
-* Git
-
----
-
-## 1. Clone the Repository
-
-```bash
-git clone https://github.com/your-username/tafseel.git
+Node.js
+npm or pnpm
+PostgreSQL
+Git
+1. Clone the Repository
+git clone <repository-url>
 
 cd tafseel
-```
-
----
-
-# 2. Backend Setup
+2. Backend Setup
 
 Navigate to the backend directory:
 
-```bash
 cd backend
-```
 
 Install dependencies:
 
-```bash
 npm install
-```
 
-Create a `.env` file in the backend root directory:
+Create a .env file in the backend root directory.
 
-```env
-DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/tafseel_db?schema=public"
+Backend Environment Variables
+DATABASE_URL="your_postgresql_connection_string"
 
-PORT=3000
-```
+ACCESSTOKEN="your_access_token_secret"
+
+REFRESHTOKEN="your_refresh_token_secret"
+
+MAIL_USER="your_email"
+
+MAIL_PASS="your_email_password_or_app_password"
+
+FRONTEND_URL="http://localhost:3000"
 
 Run Prisma migrations:
 
-```bash
 npx prisma migrate dev
-```
 
 Start the development server:
 
-```bash
 npm run start:dev
-```
 
-The backend API will be available at:
+The backend will run on:
 
-```text
-http://localhost:3000
-```
-
----
-
-# 3. Frontend Setup
+http://localhost:3001
+3. Frontend Setup
 
 Open another terminal and navigate to the frontend:
 
-```bash
 cd frontend
-```
 
 Install dependencies:
 
-```bash
 npm install
-```
 
-Create a `.env.local` file:
+Create a .env.local file:
 
-```env
-NEXT_PUBLIC_API_URL="http://localhost:3000"
-```
+NEXT_PUBLIC_API_URL="http://localhost:3001/"
+NEXT_PUBLIC_RENDER_API="https://tafssel-backend.onrender.com/"
 
 Start the Next.js development server:
 
-```bash
 npm run dev
-```
 
-The frontend will normally be available at:
+The frontend will normally run on:
 
-```text
 http://localhost:3000
-```
+4. Accessing the Application
 
-If port `3000` is already being used by the backend, Next.js will automatically use another available port, such as:
+After starting both applications:
 
-```text
+Frontend
+http://localhost:3000
+Backend
 http://localhost:3001
-```
+🌐 Live Demo
 
----
+Explore the live application:
 
-# 🔐 Environment Variables
+👉 https://tafseel-frontend.onrender.com
 
-## Backend
+Admin Pages
 
-```env
-DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/tafseel_db?schema=public"
-PORT=3000
-```
+Store Requests
 
-## Frontend
+https://tafseel-frontend.onrender.com/admin/store-requests
 
-```env
-NEXT_PUBLIC_API_URL="http://localhost:3000"
-```
+Active Stores
 
-> Never commit your `.env` or `.env.local` files to GitHub.
+https://tafseel-frontend.onrender.com/admin/stores
 
-Add them to `.gitignore`:
+All Products
 
-```gitignore
+https://tafseel-frontend.onrender.com/admin/product
+
+All Orders
+
+https://tafseel-frontend.onrender.com/admin/orders
+
+🔐 Environment Variables
+
+Environment variables are used to store sensitive configuration and deployment-specific settings.
+
+Frontend
+NEXT_PUBLIC_API_URL="http://localhost:3001/"
+NEXT_PUBLIC_RENDER_API="https://tafssel-backend.onrender.com/"
+Backend
+DATABASE_URL="your_postgresql_connection_string"
+
+ACCESSTOKEN="your_access_token_secret"
+
+REFRESHTOKEN="your_refresh_token_secret"
+
+MAIL_USER="your_email"
+
+MAIL_PASS="your_email_password_or_app_password"
+
+FRONTEND_URL="http://localhost:3000"
+
+⚠️ Never commit .env or .env.local files to GitHub.
+
+Make sure your .gitignore contains:
+
 .env
 .env.local
 .env.*.local
-```
+node_modules/
+dist/
+.next/
+🚀 Deployment
 
----
+The application is deployed using Render, while the PostgreSQL database is hosted on Neon.
 
-# ▶️ Running the Application
+                    Internet
+                       │
+             ┌─────────┴─────────┐
+             │                   │
+             ▼                   ▼
+       Next.js Frontend     NestJS Backend
+           Render              Render
+                                 │
+                                 ▼
+                           Prisma ORM
+                                 │
+                                 ▼
+                         PostgreSQL
+                            Neon
+🔮 Future Improvements
 
-You need to run both the backend and frontend.
+The following features are planned for future versions:
 
-### Terminal 1 — Backend
+💳 Online Payment Integration
+Integration with online payment gateways such as Stripe or Zain Cash.
+📍 Delivery & Location Tracking
+Delivery tracking.
+Map-based location tracking.
+Live delivery status.
+🔔 Real-Time Notifications
+Real-time notifications for orders and order status updates.
+WebSocket-based communication.
+⭐ Product & Store Reviews
+Product ratings.
+Store ratings.
+Customer reviews and comments.
+🤖 AI-Powered Furniture Recommendations
+AI-based recommendations to help customers discover suitable furniture.
+📱 Mobile Application
+A dedicated mobile application using React Native or Expo.
+📌 Project Highlights
 
-```bash
-cd backend
+Tafseel demonstrates practical experience in:
 
-npm install
+Full-Stack Web Development
+Multi-Tenant SaaS Architecture
+Role-Based Access Control
+Authentication & Authorization
+REST API Development
+Next.js
+React
+NestJS
+Node.js
+TypeScript
+PostgreSQL
+Prisma ORM
+Neon PostgreSQL
+Render Deployment
+Email Integration
+E-Commerce Workflows
+Product Management
+Order Management
+Store Management
+Dashboard Development
+Business Statistics
+Scalable System Design
+👨‍💻 Author
 
-npx prisma migrate dev
-
-npm run start:dev
-```
-
-### Terminal 2 — Frontend
-
-```bash
-cd frontend
-
-npm install
-
-npm run dev
-```
-
-Then open the frontend URL in your browser.
-
----
-
-# 🌐 Live Demo
-
-Try the deployed application:
-
-### 👉 [Tafseel Live Demo](https://tafseel-frontend.onrender.com)
-
----
-
-# 🔮 Future Improvements
-
-The platform can be extended with additional features such as:
-
-* 💳 Online payment integration.
-* 📍 Delivery and location tracking.
-* 🔔 Real-time notifications.
-* 💬 Customer/store messaging.
-* 📊 Advanced business analytics.
-* 📦 Advanced inventory management.
-* 🧾 Digital invoices.
-* ⭐ Product and store reviews.
-* 🔎 Advanced product search and filtering.
-* 🤖 AI-powered furniture recommendations.
-* 📱 Mobile application.
-* 💰 Subscription plans for store owners.
-* 📈 Advanced SaaS analytics.
-
----
-
-# 📌 Project Highlights
-
-Tafseel demonstrates practical experience with:
-
-* Full-Stack Web Development
-* Multi-Tenant SaaS Architecture
-* Role-Based Access Control
-* RESTful API Development
-* Next.js App Router
-* NestJS
-* TypeScript
-* PostgreSQL
-* Prisma ORM
-* Feature-Based Architecture
-* Authentication & Authorization
-* E-Commerce Workflows
-* Order Management
-* Dashboard Development
-* Scalable System Design
-
----
-
-# 👨‍💻 Author
-
-**Jameel Handomeh**
+Jameel Handomeh
 
 Full-Stack Software Engineer
 Amman, Jordan
 
----
-
 <div align="center">
+🛋️ Tafseel — Digitizing the Furniture Industry
 
-### 🛋️ Tafseel — Digitizing the Furniture Industry
+Built with TypeScript, Next.js, NestJS, Prisma & PostgreSQL
 
-**Built with TypeScript, Next.js, NestJS, Prisma & PostgreSQL**
-
-</div>
+</div> ```
