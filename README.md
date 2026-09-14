@@ -609,25 +609,6 @@ Try the deployed application:
 
 ---
 
-## 🛡️ Admin Dashboard
-
-### Store Registration Requests
-
-https://tafseel-frontend.onrender.com/admin/store-requests
-
-### Active Stores
-
-https://tafseel-frontend.onrender.com/admin/stores
-
-### All Products
-
-https://tafseel-frontend.onrender.com/admin/product
-
-### All Orders
-
-https://tafseel-frontend.onrender.com/admin/orders
-
----
 
 # 🔐 Environment Variables
 
